@@ -31,7 +31,7 @@ int init() {
   return res.status;
 }
 
-int set_value(char *key, char *value, float value2) {
+int set_value(char *key, char *value1, float value2) {
   q_attr.mq_curmsgs = 0;
   q_attr.mq_flags = 0;
   q_attr.mq_maxmsg = 4;
@@ -40,10 +40,13 @@ int set_value(char *key, char *value, float value2) {
   q_server = mq_open(serverq, O_WRONLY);
 
   strcpy(req.q_name, "/CLIENT_SET");
-  req.k = key;
-  strcpy(req.v, value, value2);
+  strcpy(req.k, key);
+  strcpy(req.v1, value1);
+  req.v2 = value2;
   req.f = 1;
+
   printf("res.status %d\n", res.status);
+  
   mq_send(q_server, (char *) &req, sizeof(struct request), 0);
   mq_receive(q_client, (char *) &res, sizeof(struct request), 0);
 

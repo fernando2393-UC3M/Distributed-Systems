@@ -1,12 +1,18 @@
-#include “mensaje.h”
+#include "request.h"
 #include <mqueue.h>
+
+
 void main(void) {
    mqd_t q_server;      /* server message queue */
    mqd_t q_client;      /* client message queue */
+
    struct request req;
    int res;
    struct mq_attr attr;
+   
 }
+
+
 attr.mq_maxmsg = 1;
 attr.mq_msgsize = sizeof(int);
 q_client = mq_open(“CLIENT_ONE”, O_CREAT|O_RDONLY, 0700, &attr);
