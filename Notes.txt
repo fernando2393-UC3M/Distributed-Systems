@@ -1,0 +1,49 @@
+- Los tripletes tienen que ser almacenados en el servidor
+
+- Se ha de comprobar en cada almacenamiento si la clave del triplete existe:
+    * No existe --> Se almacena el triplete en una lista
+    * Existe --> Se sabe que existe mediante la función exist(char * key) y se borra mediante delete_key(char * key)
+
+- Para el almacenamiento de tripletes, se hace una SLL de tripletes (cada triplete un nodo)
+
+    typedef struct node {
+        request value; // Nodo de tipo struct request
+        struct node * next; // Nodo siguiente
+    } node_t;
+
+- Para el almacenamiento, recorremos la lista hasta encontrar NULL
+    * Primero inicializamos la lista
+
+        node_t * head = NULL;
+        head = malloc(sizeof(node_t));
+
+        if(head == NULL){
+            return 1;
+        }
+
+        head->value = // Valor de la request ;
+        head->next = NULL;
+
+    * Para añadir una variable, recorremos la lista hasta encontrar next = NULL
+
+        node_t * dummy = head;
+
+        while(dummy->next != null){
+            dummy = dummy->next;
+        }
+
+        dummy->next = malloc(sizeof(node_t));
+        dummy->next->value = // Valor de la request ;
+        dummy->next->next = NULL;
+
+    * Para borrar, iteramos hasta la posición buscada y:
+
+        node_t * dummy = head;
+
+        while(dummy->next->value != request){
+            dummy = dummy->next;
+        }
+
+        node_t * aux = dummy->next;
+        dummy->next = dummy->next->next;
+        free(aux);
