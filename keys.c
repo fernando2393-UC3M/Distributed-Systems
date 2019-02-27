@@ -76,11 +76,11 @@ int get_value(char *key, char *value, float value2) {
   return res.status;
 }
 
-int modify_value(int key, char *value1, float *value2){
+int modify_value(char *key, char *value1, float *value2){
 
 }
 
-int delete_key(int key) {
+int delete_key(char *key) {
   q_attr.mq_curmsgs = 0;
   q_attr.mq_flags = 0;
   q_attr.mq_maxmsg = 4;
