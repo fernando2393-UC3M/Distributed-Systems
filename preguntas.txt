@@ -1,0 +1,4 @@
+- Lista como estructura de datos?
+- Init simplemente borra el contenido de la lista?
+- La lista está en cliente o servidor? Quién la implementa?
+- Estructura del mensaje que se envía --> struct del tipo request?
