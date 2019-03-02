@@ -15,6 +15,7 @@ int init()
   // Send message with op.code 0 to the server
 
   struct request req;
+  char *aux;
   int res;
 
   req.operation_code = 0; // Init code
@@ -23,7 +24,8 @@ int init()
   
   // Wait until response
 
-  mq_receive(q_client, &res, sizeof(int), 0);
+  mq_receive(q_client, &aux, sizeof(int), 0);
+  res = atoi(aux);
 
   return res;
 }
