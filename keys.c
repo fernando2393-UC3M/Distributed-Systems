@@ -63,6 +63,9 @@ int get_value(char *key, char *value, float *value2)
   strcpy(req.q_name, "CLIENT_ONE");
 
   // Wait until response
+
+  return res;
+  
 }
 
 int modify_value(char *key, char *value1, float *value2)
