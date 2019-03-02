@@ -10,112 +10,133 @@ struct request req;
 struct request res;
 struct mq_attr q_attr;
 
-struct node_t *head;
-
 int init()
 {
+  // Send message with op.code 0 to the server
 
-  /* Deletion of previous elements */
+  struct request req;
+  int res;
 
-  while (head != null)
-  {
+  req.operation_code = 0; // Init code
 
-    struct node_t *temp = head;
-    head = head->next;
+  mq_send(q_server, &req, sizeof(struct request), 0);
+  
+  // Wait until response
 
-    free(temp);
-  }
+  mq_receive(q_client, &res, sizeof(int), 0);
+
+  return res;
 }
 
 int set_value(char *key, char *value1, float value2)
 {
+  // Send message with op.code 1 to the server
+
+  struct request req;
+  int res;
+
+  req.operation_code = 1; // Init code
+
+  strcpy(key, req.key);
+  strcpy(value1, req.value1);
+  req.value2 = value2;
+
+  mq_send(q_server, &req, sizeof(struct request), 0);
+
+  // Wait until response
+
+  mq_receive(q_client, &res, sizeof(int), 0);
+
+  return res;
 }
 
-int get_value(char *key, char *value, float value2)
+int get_value(char *key, char *value, float *value2)
 {
+  // Send message with op.code 2 to the server
+
+  struct request req;
+  int res;
+
+  req.operation_code = 2; // Init code
+
+  // Wait until response
 }
 
 int modify_value(char *key, char *value1, float *value2)
 {
+  // Send message with op.code 3 to the server
+
+  struct request req;
+  int res;
+
+  req.operation_code = 3; // Init code
+
+  strcpy(key, req.key);
+  strcpy(value1, req.value1);
+  req.value2 = value2;
+
+  mq_send(q_server, &req, sizeof(struct request), 0);
+
+  // Wait until response
+
+  mq_receive(q_client, &res, sizeof(int), 0);
+
+  return res;
+
 }
 
 int delete_key(char *key)
 {
+  // Send message with op.code 4 to the server
 
-  if (exist(key) == 0)
-  {
-    return -1;
-  }
+  struct request req;
+  int res;
 
-  else if (strcmp(head->data->key, key) == 0)
-  { // Check first element
+  req.operation_code = 4; // Init code
 
-    struct node_t *temp = head;
-    head = head->next;
+  mq_send(q_server, &req, sizeof(struct request), 0);
 
-    free(temp);
+  // Wait until response
 
-    return 0;
-  }
+  mq_receive(q_client, &res, sizeof(int), 0);
 
-  else
-  {
+  return res;
 
-    struct node_t *current = head;
-    struct node_t *previous = NULL;
-
-    while (current != null)
-    {
-
-      if (strcmp(head->data->key, key) == 0)
-      { // Key found
-
-        previous->next = current->next;
-
-        free(current);
-
-        return 0;
-      }
-
-      previous = current;
-      current = current->next;
-    }
-  }
 }
 
 int exist(char *key)
 {
+  // Send message with op.code 5 to the server
 
-  struct node_t *dummy = head;
+  struct request req;
+  int res;
 
-  while (dummy != null)
-  {
+  req.operation_code = 5; // Init code
 
-    if (strcmp(dummy->data->key, key) == 0)
-    {
-      return 1; // Key exists
-    }
-    else
-    {
-      dummy = dummy->next;
-    }
-  }
+  mq_send(q_server, &req, sizeof(struct request), 0);
 
-  return 0; // Key does not exist
+  // Wait until response
+
+  mq_receive(q_client, &res, sizeof(int), 0);
+
+  return res;
+
 }
 
 int num_items()
 {
+  // Send message with op.code 6 to the server
 
-  struct node_t *dummy = head;
-  int counter = 0;
+  struct request req;
+  int res;
 
-  while(dummy != null) {
+  req.operation_code = 6; // Init code
 
-    counter++;
+  mq_send(q_server, &req, sizeof(struct request), 0);
 
-  }
+  // Wait until response
 
-  return counter;
+  mq_receive(q_client, &res, sizeof(int), 0);
 
+  return res;
 }
