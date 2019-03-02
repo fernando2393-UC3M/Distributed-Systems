@@ -18,6 +18,7 @@ int init()
   int res;
 
   req.operation_code = 0; // Init code
+  strcpy(req.q_name, "CLIENT_ONE");
 
   mq_send(q_server, &req, sizeof(struct request), 0);
   
@@ -36,6 +37,7 @@ int set_value(char *key, char *value1, float value2)
   int res;
 
   req.operation_code = 1; // Init code
+  strcpy(req.q_name, "CLIENT_ONE");
 
   strcpy(key, req.key);
   strcpy(value1, req.value1);
@@ -58,6 +60,7 @@ int get_value(char *key, char *value, float *value2)
   int res;
 
   req.operation_code = 2; // Init code
+  strcpy(req.q_name, "CLIENT_ONE");
 
   // Wait until response
 }
@@ -70,6 +73,7 @@ int modify_value(char *key, char *value1, float *value2)
   int res;
 
   req.operation_code = 3; // Init code
+  strcpy(req.q_name, "CLIENT_ONE");
 
   strcpy(key, req.key);
   strcpy(value1, req.value1);
@@ -93,6 +97,7 @@ int delete_key(char *key)
   int res;
 
   req.operation_code = 4; // Init code
+  strcpy(req.q_name, "CLIENT_ONE");
 
   mq_send(q_server, &req, sizeof(struct request), 0);
 
@@ -112,6 +117,7 @@ int exist(char *key)
   int res;
 
   req.operation_code = 5; // Init code
+  strcpy(req.q_name, "CLIENT_ONE");
 
   mq_send(q_server, &req, sizeof(struct request), 0);
 
@@ -131,6 +137,7 @@ int num_items()
   int res;
 
   req.operation_code = 6; // Init code
+  strcpy(req.q_name, "CLIENT_ONE");
 
   mq_send(q_server, &req, sizeof(struct request), 0);
 

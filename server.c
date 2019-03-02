@@ -29,17 +29,7 @@ int main(void)
   /* Queue size */
 
   q_attr.mq_maxmsg = 20;
-  q_attr.mq_msgsize = sizeof(struct request));
-
-  /* List initialization */
-
-  node_t *head = NULL;
-  head = malloc(sizeof(node_t));
-
-  request triplet = NULL;
-
-  head->value = triplet;
-  head->next = NULL;
+  q_attr.mq_msgsize = sizeof(struct request);
 
   /* Initialization */
 
