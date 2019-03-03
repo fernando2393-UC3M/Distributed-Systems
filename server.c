@@ -1,14 +1,25 @@
 #include <mqueue.h>
+#include <fcntl.h>
+#include <errno.h>
 #include <string.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
-#include "request.h"
+#include "message.h"
+#include "sll.c"
+
+/* Definition of process message function */
+
+void process_message(struct message *msg);
 
 /* List definition for storing triplets */
 
-struct node_t *head = NULL;
+#define SERVER_QUEUE "/SERVER_QUEUE"
+#define CLIENT_QUEUE "/CLIENT_QUEUE"
+
+#define TRUE 1
+#define FALSE 0
 
 /* mutex and condition variables for the message copy */
 
@@ -21,36 +32,49 @@ int main(void)
 
   /* Server data */
 
-  mqd_t q_server;        /* server queue */
-  struct request msg;    /* message to receive */
-  struct mq_attr q_attr; /* queue atributes */
-  pthread_attr_t t_attr; /* thread atributes */
+  mqd_t q_server;        /* Server queue */
+  struct message msg;    /* Message to receive */
+  struct mq_attr q_attr; /* Queue atributes */
+  pthread_attr_t t_attr; /* Thread atributes */
 
   /* Queue size */
 
-  q_attr.mq_maxmsg = 20;
-  q_attr.mq_msgsize = sizeof(struct request);
+  q_attr.mq_maxmsg = 10;
+  q_attr.mq_msgsize = sizeof(struct message);
 
   /* Initialization */
 
-  q_server = mq_open(“SERVER”, O_CREAT | O_RDONLY, 0700, &attr);
+  q_server = mq_open(SERVER_QUEUE, O_CREAT | O_RDONLY, 0666, &q_attr);
   if (q_server == -1)
   {
-    perror(”Can’t create server queue”);
-    return 1;
+    perror("Can’t create server queue");
+    return -1;
+  }
+  else {
+    printf("Server has been initiated \n");
   }
 
   pthread_mutex_init(&mutex_msg, NULL);
   pthread_cond_init(&cond_msg, NULL);
-  pthread_attr_init(&attr);
+  pthread_attr_init(&t_attr);
 
   /* Thread atributes */
   pthread_attr_setdetachstate(&t_attr, PTHREAD_CREATE_DETACHED);
 
+  pthread_t thid;
+
   while (TRUE)
   {
-    mq_receive(q_server, &msg, sizeof(struct request), 0);
-    pthread_create(&thid, &attr, process_message, &msg);
+
+    if(mq_receive(q_server, (char *)&msg, sizeof(struct message), 0) == -1){
+      perror("mq_receive error");
+      return -1;
+    }
+    
+    if(pthread_create(&thid, &t_attr, (void *)process_message, &msg) != 0){
+      perror("Server thread creation error");
+      return -1;
+    }
 
     /* Critical Section --> message copying */
 
@@ -66,32 +90,32 @@ int main(void)
   }
 }
 
-void process_message(struct mensaje *msg)
+void process_message(struct message *msg)
 {
 
-  struct request *msg_local;
-  struct mqd_t q_client;
-  int op_code;
+  struct message msg_local; // Local message
+  mqd_t q_client;           // Client queue
+  int op_code;              // Operation code sent by client
 
   /* Thread copies message to local message */
   pthread_mutex_lock(&mutex_msg);
 
-  memcpy((char *)&msg_local, (char *)&msg, sizeof(struct request));
+  memcpy(&msg_local, msg, sizeof(struct message));
 
-  /* wake up server */
-  message_not_copied = FALSE; /* FALSE = 0 */
+  /* Client request obtained --> start processing reply */
+  printf("\n********************\n");
+  printf("Received request from: %s\n", (char *)msg_local.q_name);
+  printf("MESSAGE RECEIVED\n");
+  printf("Operation code: %d\n", msg_local.operation_code);
+  printf("Key: %s\n", msg_local.key);
+  printf("Value1: %s\n", msg_local.value1);
+  printf("Value2: %f\n", msg_local.value2);
 
-  int result;
-  char *server_value1;
-  float server_value2;
+  int result; // Result of the operation to be returned in the response
 
-  pthread_cond_signal(&cond_msg);
+  /* Execute client message and prepare reply */
 
-  pthread_mutex_unlock(&mutex_msg);
-
-  /* Execute client request and prepare reply */
-
-  op_code = msg_local->operation_code;
+  op_code = msg_local.operation_code;
 
   switch (op_code)
   {
@@ -100,150 +124,89 @@ void process_message(struct mensaje *msg)
 
     /* Deletion of previous elements */
 
-    while (head != null)
-    {
-
-      struct node_t *temp = head;
-      head = head->next;
-
-      free(temp);
-    }
-
-    head = malloc(sizeof(node_t)); // New instantiation of list
+    result = removelist();
 
     break;
 
   case 1: // Set value
 
-    if (server_exist(msg_local) == 0)
+    if (exist(msg_local.key) != NULL)
     {
-      result = -1;
       perror("This key is already inserted!");
-
+      result = -1;
       // Return this value to client
     }
 
-    struct node_t *dummy = head;
-
-    while (dummy->next != NULL)
+    else
     {
-      dummy = dummy->next;
+      result = setNode(msg_local.key, msg_local.value1, msg_local.value2);
     }
-
-    dummy->next = malloc(size_t(node_t)); // New node creation
-
-    strcpy(msg_local->key, dummy->next->data->key);       // Copy key from message to list
-    strcpy(msg_local->value1, dummy->next->data->value1); // Copy value 1 from message to list
-    dummy->next->data->value2 = msg_local->value2;        // Copy value 2 from message to list
-
-    result = 0; // Value properly inserted
 
     break;
 
   case 2: // Get value
 
-    if (server_exist(msg_local) == 0)
-    { // Check if exists
-      result = -1;
+    if (exist(msg_local.key) == NULL)
+    {
       perror("This key does not exist!");
-
+      result = -1;
       // Return this value to client
     }
 
-    struct node_t *dummy = head;
+    else
+    {
+      Node * node = getNode(msg_local.key);
 
-    while (strcmp(dummy->data->key, msg_local->key) != 0)
-    { // Find the node
-      dummy = dummy->next;
+      strcpy(msg_local.value1, node->value1); // Value 1 of the node to be returned in message
+      msg_local.value2 = msg_local.value2; // Value 2 of the node to be returned in message
+
+      result = 0; // Value properly obtained
     }
-
-    strcpy(dummy->data->value1, server_value1); // Value 1 of the node to be returned in message
-    server_value2 = dummy->data->value2;        // Value 2 of the node to be returned in message
-
-    result = 0; // Value properly obtained
 
     break;
 
   case 3: // Modify value
 
-    if (server_exist(msg_local) == 0)
-    { // Check if exists
-      result = -1;
+    if (exist(msg_local.key) == NULL)
+    {
       perror("This key does not exist!");
-
+      result = -1;
       // Return this value to client
     }
 
-    struct node_t *dummy = head;
-
-    while (strcmp(dummy->data->key, msg_local->key) != 0)
-    { // Find the node
-      dummy = dummy->next;
+    else
+    {
+      result = modifyNode(msg_local.key, msg_local.value1, msg_local.value2);
     }
-
-    strcpy(msg_local->value1, dummy->data->value1); // Update value1 in list node
-    dummy->data->value2 = msg_local->value2;        // Updaye value2 in list node
-
-    result = 0;
 
     break;
 
   case 4: // Delete value by key
 
-    if (server_exist(msg_local) == 0)
+    if (exist(msg_local.key) == NULL)
     {
-      return -1; // Value does not exist
+      perror("This key does not exist!");
+      result = -1;
+      // Return this value to client
     }
 
-    else if (strcmp(head->data->key, msg_local->key) == 0)
-    { // Check first element
-
-      struct node_t *temp = head;
-      head = head->next;
-
-      free(temp);
-    }
-
-    else
-    {
-
-      struct node_t *current = head;
-      struct node_t *previous = NULL;
-
-      while (current != null)
-      {
-
-        if (strcmp(head->data->key, msg_local->key) == 0)
-        { // Key found
-
-          previous->next = current->next;
-
-          free(current);
-        }
-
-        previous = current;
-        current = current->next;
-      }
-    }
+    result = deleteByKey(msg_local.key);    
 
     break;
 
   case 5: // Value exists
 
-    result = server_exist(msg_local); // 0 if not, 1 if exists
-
+    if(exist(msg_local.key) != NULL){
+      result = 1;
+    }
+    else {
+      result = 0;
+    }
     break;
 
   case 6: // Number of items
 
-    struct node_t *dummy = head;
-    int counter = 0;
-
-    while (dummy != null)
-    {
-
-      counter++;
-    }
+    result = getCardinality();
 
     break;
 
@@ -253,7 +216,24 @@ void process_message(struct mensaje *msg)
 
   /* Return result to client by sending it to queue */
 
-  q_client = mq_open(msg_local.name, O_WRONLY);
+  /* Wake up server */
+  message_not_copied = FALSE; /* FALSE = 0 */
+
+  pthread_cond_signal(&cond_msg);
+
+  pthread_mutex_unlock(&mutex_msg);
+
+  q_client = mq_open(msg_local.q_name, O_WRONLY);
+
+  msg_local.operation_code = result; // Introducing the result of processing in operation code of the response
+
+  printf("Code from server: %d\n", result);
+
+  printf("MESSAGE TO BE SENT\n");
+  printf("Operation code: %d\n", msg_local.operation_code);
+  printf("Key: %s\n", msg_local.key);
+  printf("Value1: %s\n", msg_local.value1);
+  printf("Value2: %f\n", msg_local.value2);
 
   if (q_client == -1)
   {
@@ -262,31 +242,12 @@ void process_message(struct mensaje *msg)
 
   else
   {
-    mq_send(q_client, (char *)&result, sizeof(int), 0);
+    mq_send(q_client, (char *)&msg_local, sizeof(struct message), 0);
+    printf("MESSAGE SENT\n");
     mq_close(q_client);
+    printf("QUEUE CLOSED\n");
+    printf("\n********************\n");
   }
 
   pthread_exit(0);
-}
-
-int server_exist(struct request *msg_local)
-{
-
-  struct node_t *dummy = head;
-
-  while (dummy != null)
-  {
-
-    if (strcmp(dummy->data->key, msg_local->key) == 0)
-    {
-      // Key exists
-      return 1;
-    }
-    else
-    {
-      dummy = dummy->next; // Advance position in list
-    }
-  }
-
-  return 0; // Key does not exist
 }

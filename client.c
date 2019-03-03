@@ -1,32 +1,64 @@
-#include "request.h"
-#include <mqueue.h>
+#include <stdio.h>
+#include "keys.h"
 
 
-void main(void) {
-   mqd_t q_server;      /* Server message queue */
-   mqd_t q_client;      /* Client message queue */
+int main(void) {
 
-   struct request req;
-   int res;
-   struct mq_attr attr;
+   int outcome;
 
-   attr.mq_maxmsg = 1;
-   attr.mq_msgsize = sizeof(request);
-   q_client = mq_open("CLIENT_ONE", O_CREAT|O_RDONLY, 0700, &attr);
+   /* Triplet values */
 
-   q_server = mq_open("ADD_SERVER", O_WRONLY);
+   char * key = "Test Set Value";
+   char * value1 = "Test Value 1";
+   float value2 = 3.14159;
 
-   /* Fill in request */
-   req.key = "Testing";
-   req.value1 = "Value1";
-   req.value2 = 2.1; 
-   strcpy(req.q_name, "CLIENT_ONE");
+   /* Testing all functions from keys.c API */
 
-   mq_send(q_server, &req, sizeof(struct request), 0);
-   mq_receive(q_client, &res, sizeof(int), 0);
+   /* Init */
 
-   mq_close(q_server);
-   mq_close(q_client);
-   mq_unlink("CLIENT_ONE");
+   printf("Init function: \n");
+   outcome = init();
+   printf("Init outcome: %d\n", outcome);
+
+   /* Set Value */ 
+
+   printf("Set Value function: \n");
+   outcome = set_value(key, value1, value2);
+   printf("Set Value outcome: %d\n", outcome);
+
+   /* Modify Value */
+
+   value2 = 2.71183;
+
+   printf("Modify Value function: \n");
+   outcome = modify_value(key, "Test Modified Value", &value2);
+   printf("Modify Value outcome: %d\n", outcome);
+
+   /* Get Value */
+
+   printf("Get Value function: \n");
+   outcome = get_value(key, value1, &value2);
+   printf("Init outcome: %d\n", outcome);
+   printf("Obtained value: %s %s %f", key, value1, value2);
+
+   /* Exists */
+
+   printf("Exists function: \n");
+   outcome = exist(key);
+   printf("Exists outcome: %d\n", outcome);
+
+   /* Delete Key */
+
+   printf("Delete Key function: \n");
+   outcome = delete_key(key);
+   printf("Delete Key outcome: %d\n", outcome);
+
+   /* Delete Key */
+
+   printf("Num Items function: \n");
+   outcome = num_items();
+   printf("Num Items outcome: %d\n", outcome);
+
+   return 0;
 
 }

@@ -1,18 +1,21 @@
 CC=gcc
-CFLAGS=-Wall -g
+CFLAGS=-g -Wall
+
+all: keys.o libkeys.a server client
+.PHONY: all
+
+server: server.c
+	$(CC) $(CFLAGS) -lrt -pthread -o server server.c
 
 keys.o: keys.c
-	$(CC) $(CFLAGS) -c keys.c
+	$(CC) $(CFLAGS) -lrt -c keys.c
 
 libkeys.a: keys.o
 	ar -rv libkeys.a keys.o
 
-server: server.c server.o
-	$(CC) $(CFLAGS) -o server server.c server.o
-
-client: client.c keys.a
-	$(CC) $(CFLAGS) -o client client.c libkeys.a
+client: client.c libkeys.a
+	$(CC) $(CFLAGS) -lrt -o client client.c libkeys.a
 
 .PHONY: clean
 clean:
-	rm -rf *.o
+	rm -rf server client *.o *.a
