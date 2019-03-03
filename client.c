@@ -14,19 +14,21 @@ int main(void) {
 
    /* Testing all functions from keys.c API */
 
-   /* Init */
+   /* Init (0)*/
 
    printf("Init function: \n");
    outcome = init();
    printf("Init outcome: %d\n", outcome);
 
-   /* Set Value */ 
+   /* Set Value (1)*/ 
 
    printf("Set Value function: \n");
    outcome = set_value(key, value1, value2);
    printf("Set Value outcome: %d\n", outcome);
 
-   /* Modify Value */
+
+   /* Modify Value (3)*/
+
 
    value2 = 2.71183;
 
@@ -34,26 +36,32 @@ int main(void) {
    outcome = modify_value(key, "Test Modified Value", &value2);
    printf("Modify Value outcome: %d\n", outcome);
 
-   /* Get Value */
+   /* Get Value (2)*/
 
+   
    printf("Get Value function: \n");
    outcome = get_value(key, value1, &value2);
-   printf("Init outcome: %d\n", outcome);
+   printf("Get Value outcome: %d\n", outcome);
    printf("Obtained value: %s %s %f", key, value1, value2);
+   
 
-   /* Exists */
+   /* Exists (5)*/
+
 
    printf("Exists function: \n");
    outcome = exist(key);
    printf("Exists outcome: %d\n", outcome);
 
-   /* Delete Key */
+
+   /* Delete Key (4)*/
+
 
    printf("Delete Key function: \n");
    outcome = delete_key(key);
    printf("Delete Key outcome: %d\n", outcome);
 
-   /* Delete Key */
+
+   /* Num Items (6)*/
 
    printf("Num Items function: \n");
    outcome = num_items();

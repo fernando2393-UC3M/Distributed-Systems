@@ -106,8 +106,9 @@ int messagePassing(int operation_code, char * key, char * value1, float value2, 
 
     /* Fill the request */
 
-    strcpy(request.q_name, CLIENT_QUEUE); //
+    strcpy(request.q_name, CLIENT_QUEUE);
     request.operation_code = operation_code;
+    memset(request.key, '\0', sizeof(request.key));
     strcpy(request.key, key);
     memset(request.value1, '\0', sizeof(request.value1));
     strcpy(request.value1, value1);
@@ -117,7 +118,7 @@ int messagePassing(int operation_code, char * key, char * value1, float value2, 
     printf("Operation Code: %d\n", request.operation_code);
     printf("Key: %s\n", request.key);
     printf("Value1: %s\n", request.value1);
-    printf("Value2: %f\n\n", request.value2);
+    printf("Value2: %f\n", request.value2);
 
     /* Send request to server */
     printf("Sending request... ");

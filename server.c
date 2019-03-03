@@ -95,7 +95,6 @@ void process_message(struct message *msg)
 
   struct message msg_local; // Local message
   mqd_t q_client;           // Client queue
-  int op_code;              // Operation code sent by client
 
   /* Thread copies message to local message */
   pthread_mutex_lock(&mutex_msg);
@@ -115,9 +114,7 @@ void process_message(struct message *msg)
 
   /* Execute client message and prepare reply */
 
-  op_code = msg_local.operation_code;
-
-  switch (op_code)
+  switch (msg_local.operation_code)
   {
 
   case 0: // Init
@@ -130,7 +127,7 @@ void process_message(struct message *msg)
 
   case 1: // Set value
 
-    if (exist(msg_local.key) != NULL)
+    if (getNode(msg_local.key) != NULL)
     {
       perror("This key is already inserted!");
       result = -1;
@@ -139,14 +136,19 @@ void process_message(struct message *msg)
 
     else
     {
-      result = setNode(msg_local.key, msg_local.value1, msg_local.value2);
+      Node * newNode = createNewNode(msg_local.key, msg_local.value1, msg_local.value2);
+      if (newNode == NULL) {
+        perror("Error creating new node!");
+        result = -1;
+      }
+      result = setNode(newNode);
     }
 
     break;
 
   case 2: // Get value
 
-    if (exist(msg_local.key) == NULL)
+    if (getNode(msg_local.key) == NULL)
     {
       perror("This key does not exist!");
       result = -1;
@@ -158,7 +160,7 @@ void process_message(struct message *msg)
       Node * node = getNode(msg_local.key);
 
       strcpy(msg_local.value1, node->value1); // Value 1 of the node to be returned in message
-      msg_local.value2 = msg_local.value2; // Value 2 of the node to be returned in message
+      msg_local.value2 = node->value2; // Value 2 of the node to be returned in message
 
       result = 0; // Value properly obtained
     }
@@ -167,7 +169,7 @@ void process_message(struct message *msg)
 
   case 3: // Modify value
 
-    if (exist(msg_local.key) == NULL)
+    if (getNode(msg_local.key) == NULL)
     {
       perror("This key does not exist!");
       result = -1;
@@ -176,14 +178,19 @@ void process_message(struct message *msg)
 
     else
     {
-      result = modifyNode(msg_local.key, msg_local.value1, msg_local.value2);
+      Node * newNode = createNewNode(msg_local.key, msg_local.value1, msg_local.value2);
+      if (newNode == NULL) {
+        perror("Error creating new node!");
+        result = -1;
+      }
+      result = modifyNode(newNode);
     }
 
     break;
 
   case 4: // Delete value by key
 
-    if (exist(msg_local.key) == NULL)
+    if (getNode(msg_local.key) == NULL)
     {
       perror("This key does not exist!");
       result = -1;
@@ -196,7 +203,7 @@ void process_message(struct message *msg)
 
   case 5: // Value exists
 
-    if(exist(msg_local.key) != NULL){
+    if(getNode(msg_local.key) != NULL){
       result = 1;
     }
     else {

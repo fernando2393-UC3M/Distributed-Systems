@@ -2,14 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAXSIZE 255
-
 /* SSL Definition */
 
 typedef struct Node
 {
     char key[MAXSIZE];
-    char value1[MAXSIZE + 1];
+    char value1[MAXSIZE];
     float value2;
     struct Node *next; // Next node
 } Node;
@@ -34,22 +32,35 @@ int removelist()
     return 0;
 }
 
-int setNode(char *key, char *value1, float value2)
+Node * createNewNode(char * key, char *value1, float value2){
+
+    Node* newNode = (Node*)malloc(sizeof(Node));
+
+    strcpy(newNode->key, key);
+    strcpy(newNode->value1, value1);
+    newNode->value2 = value2;
+    newNode->next = NULL;
+
+    return newNode;
+
+}
+
+int setNode(Node * node)
 {
 
     Node *dummy = head;
+
+    if(head == NULL) {
+        head = node;
+        return 0;
+    }
 
     while (dummy != NULL)
     {
         dummy = dummy->next;
     }
 
-    dummy = malloc(sizeof(struct Node));
-    strcpy(dummy->key, key);
-    strcpy(dummy->value1, value1);
-    dummy->value2 = value2;
-    dummy->next = NULL;
-
+    dummy = node;
     return 0;
 }
 
@@ -58,18 +69,35 @@ Node *getNode(char *key)
 
     Node *dummy = head;
 
-    while (strcmp(dummy->key, key) != 0)
+    if(head == NULL) {
+        return NULL;
+    }
+
+    while (dummy != NULL)
     {
+        if(strcmp(dummy->key, key) == 0){
+            return dummy;
+        }
         dummy = dummy->next;
     }
 
-    return dummy;
+    return NULL;
 }
 
-int modifyNode(char *key, char *value1, float value2){
-    Node * dummy = getNode(key);
-    strcpy(dummy->value1, value1);
-    dummy->value2 = value2;
+int modifyNode(Node * node){
+
+    Node * dummy = head;
+
+    while(dummy != NULL){
+        if(strcmp(dummy->key, node->key) == 0){
+            strcpy(dummy->value1, node->value1);
+            dummy->value2 = node->value2;
+            printf("\nValues now are:\n");
+            return 0;
+        }
+
+        dummy = dummy->next;
+    }
 
     return 0;
 }
@@ -109,34 +137,16 @@ int deleteByKey(char * key) {
     return -1;
 }
 
-Node *exist(char *key)
-{
-
-    Node *dummy = head;
-
-    if (head == NULL)
-    {
-        return NULL;
-    }
-
-    while (dummy != NULL)
-    {
-        if (strcmp(dummy->key, key) == 0)
-        {
-            return dummy;
-        }
-        dummy = dummy->next;
-    }
-
-    return NULL;
-}
-
 int getCardinality() {
-    int counter;
 
     Node * dummy = head;
+    int counter = 0;
 
-    while(dummy->next != NULL) {
+    if(head == NULL) {
+        return counter;
+    }
+
+    while(dummy != NULL) {
         counter++;
         dummy = dummy->next;
     }
