@@ -38,7 +38,7 @@ int get_value(char *key, char *value1, float *value2)
 
   struct message msg_local;
 
-  if(messagePassing(2, key, "", 0, &msg_local) == 0) { // Message processing properly done
+  if(messagePassing(2, key, value1, *value2, &msg_local) == 0) { // Message processing properly done
     strcpy(value1, msg_local.value1);
     *value2 = msg_local.value2;
     return 0;
