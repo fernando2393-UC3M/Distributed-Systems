@@ -1,5 +1,7 @@
 #include <stdio.h>
+#include <string.h>
 #include "keys.h"
+#include "message.h"
 
 
 int main(void) {
@@ -9,8 +11,10 @@ int main(void) {
    /* Triplet values */
 
    char * key = "Test Set Value";
-   char * value1 = "Test Value 1";
+   char value1 [MAXSIZE];
    float value2 = 3.14159;
+
+   strcpy(value1, "Test Value 1");
 
    /* Testing all functions from keys.c API */
 

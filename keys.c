@@ -6,39 +6,33 @@
 #define SERVER_QUEUE "/SERVER_QUEUE"
 #define CLIENT_QUEUE "/CLIENT_QUEUE"
 
-struct message req;
-struct message res;
 struct mq_attr q_attr;
+
+struct message msg_local;
 
 /* Definition of messagePassing function */
 
-int messagePassing(int operation_code, char * key, char * value1, float value2, struct message * destination);
+int messagePassing(int operation_code, char * key, char * value1, float value2);
 
 int init()
 {
   // Send message with op.code 0 to the server
 
-  struct message msg_local;
-
-  return messagePassing(0, "", "", 0, &msg_local); 
+  return messagePassing(0, "", "", 0); 
 }
 
 int set_value(char *key, char *value1, float value2)
 {
   // Send message with op.code 1 to the server
 
-  struct message msg_local;
-
-  return messagePassing(1, key, value1, value2, &msg_local);
+  return messagePassing(1, key, value1, value2);
 }
 
 int get_value(char *key, char *value1, float *value2)
 {
   // Send message with op.code 2 to the server
 
-  struct message msg_local;
-
-  if(messagePassing(2, key, value1, *value2, &msg_local) == 0) { // Message processing properly done
+  if(messagePassing(2, key, value1, *value2) == 0) { // Message processing properly done
     strcpy(value1, msg_local.value1);
     *value2 = msg_local.value2;
     return 0;
@@ -51,9 +45,7 @@ int modify_value(char *key, char *value1, float *value2)
 {
   // Send message with op.code 3 to the server
 
-  struct message msg_local;
-
-  return messagePassing(3, key, value1, *value2, &msg_local);
+  return messagePassing(3, key, value1, *value2);
 
 }
 
@@ -61,9 +53,7 @@ int delete_key(char *key)
 {
   // Send message with op.code 4 to the server
 
-  struct message msg_local;
-
-  return messagePassing(4, key, "", 0, &msg_local);
+  return messagePassing(4, key, "", 0);
 
 }
 
@@ -71,9 +61,7 @@ int exist(char *key)
 {
   // Send message with op.code 5 to the server
 
-  struct message msg_local;
-
-  return messagePassing(5, key, "", 0, &msg_local);
+  return messagePassing(5, key, "", 0);
 
 }
 
@@ -81,12 +69,10 @@ int num_items()
 {
   // Send message with op.code 6 to the server
 
-  struct message msg_local;
-
-  return messagePassing(6, "", "", 0, &msg_local);
+  return messagePassing(6, "", "", 0);
 }
 
-int messagePassing(int operation_code, char * key, char * value1, float value2, struct message * destination){
+int messagePassing(int operation_code, char * key, char * value1, float value2){
 
   mqd_t q_server; /* Server message queue */
   mqd_t q_client; /* Client message queue */
@@ -127,7 +113,7 @@ int messagePassing(int operation_code, char * key, char * value1, float value2, 
 
     /* Receiving response */
     printf("Waiting for response... ");
-    mq_receive(q_client, (char*) destination, sizeof(struct message), 0);
+    mq_receive(q_client, (char*) &msg_local, sizeof(struct message), 0);
     printf("Response received.\n");
 
     /* Close the queues */
@@ -136,7 +122,7 @@ int messagePassing(int operation_code, char * key, char * value1, float value2, 
 
     /* Unlink client queue */
     mq_unlink(CLIENT_QUEUE);
-
-    return destination->operation_code;
+    
+    return msg_local.operation_code;
 
 }
