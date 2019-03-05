@@ -100,7 +100,7 @@ int messagePassing(int operation_code, char * key, char * value1, float value2){
     strcpy(request.value1, value1);
     request.value2 = value2;
 
-    printf("Request sent:\n");
+    printf("REQUEST TO BE SENT:\n\n");
     printf("Operation Code: %d\n", request.operation_code);
     printf("Key: %s\n", request.key);
     printf("Value1: %s\n", request.value1);

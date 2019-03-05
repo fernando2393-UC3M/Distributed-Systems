@@ -20,15 +20,15 @@ int main(void) {
 
    /* Init (0)*/
 
-   printf("Init function: \n");
+   printf("-------------- INIT FUNCTION -------------- \n\n");
    outcome = init();
    printf("Init outcome: %d\n", outcome);
 
    /* Set Value (1)*/ 
 
-   printf("Set Value function: \n");
+   printf("-------------- SET VALUE FUNCTION -------------- \n\n");
    outcome = set_value(key, value1, value2);
-   printf("Set Value outcome: %d\n", outcome);
+   printf("Set Value outcome: %d\n\n", outcome);
 
 
    /* Modify Value (3)*/
@@ -36,40 +36,38 @@ int main(void) {
 
    value2 = 2.71183;
 
-   printf("Modify Value function: \n");
+   printf("-------------- MODIFY VALUE FUNCTION -------------- \n\n");
    outcome = modify_value(key, "Test Modified Value", &value2);
-   printf("Modify Value outcome: %d\n", outcome);
+   printf("Modify Value outcome: %d\n\n", outcome);
 
    /* Get Value (2)*/
 
    
-   printf("Get Value function: \n");
+   printf("-------------- GET VALUE FUNCTION -------------- \n\n");
    outcome = get_value(key, value1, &value2);
    printf("Get Value outcome: %d\n", outcome);
-   printf("Obtained value: %s %s %f", key, value1, value2);
+   printf("Obtained triplet:\nKey:  %s\nValue 1: %s\nValue 2: %f\n\n", key, value1, value2);
    
 
    /* Exists (5)*/
 
-
-   printf("Exists function: \n");
+   printf("-------------- EXISTS FUNCTION -------------- \n\n");
    outcome = exist(key);
-   printf("Exists outcome: %d\n", outcome);
+   printf("Exists outcome: %d\n\n", outcome);
 
 
    /* Delete Key (4)*/
 
-
-   printf("Delete Key function: \n");
+   printf("-------------- DELETE KEY FUNCTION -------------- \n\n");
    outcome = delete_key(key);
-   printf("Delete Key outcome: %d\n", outcome);
+   printf("Delete Key outcome: %d\n\n", outcome);
 
 
    /* Num Items (6)*/
 
-   printf("Num Items function: \n");
+   printf("-------------- NUM ITEMS FUNCTION -------------- \n\n");
    outcome = num_items();
-   printf("Num Items outcome: %d\n", outcome);
+   printf("Num Items outcome: %d\n\n", outcome);
 
    return 0;
 
