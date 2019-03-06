@@ -57,10 +57,14 @@ int setNode(Node * node)
 
     while (dummy != NULL)
     {
-        dummy = dummy->next;
+        if(dummy->next != NULL) {
+            dummy = dummy->next;
+        }
+        else {
+            break;
+        }
     }
-
-    dummy = node;
+    dummy->next = node;
     return 0;
 }
 
@@ -143,7 +147,7 @@ int getCardinality() {
     int counter = 0;
 
     if(head == NULL) {
-        return counter;
+        return counter; // Counter is 0
     }
 
     while(dummy != NULL) {
