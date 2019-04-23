@@ -27,9 +27,10 @@ int main(int argc, char *argv[]) {
 	memset(topic, '\0', sizeof(topic)); // Add \0 in the end of string
 	memset(text, '\0', sizeof(text)); // Add \0 in the end of string
 
-	if(argc != 9 ){ /* IP address & port number*/
+	if (argc != 9)
+	{ /* IP address & port number*/
 		printf("There are %d arguments!\n", argc);
-	  perror("Arguments to the editor must be: ./editor -h host-broker -p port -t topic -m text");
+		perror("Arguments to the editor must be: ./editor -h host-broker -p port -t topic -m text");
 		return -1;
 	}
 
@@ -69,36 +70,29 @@ int main(int argc, char *argv[]) {
 	printf("Port: %s\n", port);
 	printf("Topic: %s\n", topic);
 	printf("Text: %s\n", text);
-
 	char packet [TOPIC_SIZE + TEXT_SIZE + 1]; // 1 added due to the separation topic:text
 	memset(packet, '\0', sizeof(packet));
 	sprintf(packet, "%s:%s", topic, text);
 	printf("Packet to be sent: \n\n%s\n", packet);
-	printf("1");
 	/*Socket creation*/
 	int sd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	printf("2");
+	
 	if (sd < 0)
 	{
 		perror("Error declaring socket");
 		return -1;
 	}
-	printf("3");
+	
 	hp = gethostbyname(argv[2]);
-	printf("4");
 	memcpy(&(server_address.sin_addr), hp->h_addr, hp->h_length);
-	printf("5");
 
 	server_address.sin_family = AF_INET;
-	printf("6");
 	server_address.sin_port = htons(atoi(argv[4]));
-	printf("7");
 	bzero(&(server_address.sin_zero), sizeof(server_address)); 
-	printf("8");
 
 	/*Connection*/
 
-	/*if (connect(sd, (struct sockaddr *)&server_address, sizeof(server_address)) < 0)
+	if (connect(sd, (struct sockaddr *)&server_address, sizeof(server_address)) < 0)
 	{
 		fprintf(stderr, "Error in the connection to the server %s:%s", host, port);
 		return -1;
@@ -106,7 +100,7 @@ int main(int argc, char *argv[]) {
 	else
 	{
 		printf("Successfully connected to the server\n");
-	}*/
+	}
 
 	/* Send packet to broker */
 
@@ -114,8 +108,6 @@ int main(int argc, char *argv[]) {
 		perror("Error sending packet");
 		return -1;
 	}
-
-	printf("TEXT");
 
 	return 0;
 }
