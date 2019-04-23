@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
 	char packet [TOPIC_SIZE + TEXT_SIZE + 1]; // 1 added due to the separation topic:text
 	memset(packet, '\0', sizeof(packet));
 	sprintf(packet, "%s:%s", topic, text);
-	printf("Packet to be sent: \n\n%s\n", packet);
+	printf("Packet to be sent: %s\n", packet);
 	/*Socket creation*/
 	int sd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	
@@ -82,13 +82,14 @@ int main(int argc, char *argv[]) {
 		perror("Error declaring socket");
 		return -1;
 	}
+
+	bzero((char *)&server_address, sizeof(server_address));
 	
 	hp = gethostbyname(argv[2]);
 	memcpy(&(server_address.sin_addr), hp->h_addr, hp->h_length);
 
 	server_address.sin_family = AF_INET;
-	server_address.sin_port = htons(atoi(argv[4]));
-	bzero(&(server_address.sin_zero), sizeof(server_address)); 
+	server_address.sin_port = htons(atoi(argv[4])); 
 
 	/*Connection*/
 
