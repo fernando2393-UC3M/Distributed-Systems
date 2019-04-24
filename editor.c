@@ -85,11 +85,11 @@ int main(int argc, char *argv[]) {
 
 	bzero((char *)&server_address, sizeof(server_address));
 	
-	hp = gethostbyname(argv[2]);
+	hp = gethostbyname(host);
 	memcpy(&(server_address.sin_addr), hp->h_addr, hp->h_length);
 
 	server_address.sin_family = AF_INET;
-	server_address.sin_port = htons(atoi(argv[4])); 
+	server_address.sin_port = htons(atoi(port)); 
 
 	/*Connection*/
 
