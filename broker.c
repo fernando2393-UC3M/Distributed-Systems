@@ -12,12 +12,13 @@
 
 #define FALSE 0
 #define TRUE 1
-#define MAX_CONNECTIONS 10
+#define MAX_CONNECTIONS 3
 
 /* Editor packet components size */
 
 #define TOPIC_SIZE 128
 #define TEXT_SIZE 1024
+#define OPERATION "PUBLISH"
 
 /* Thread variables */
 
@@ -33,6 +34,13 @@ void print_usage()
 void *manage_request (int* s) {
 
 	int s_local;
+	int position = 0;
+	int aux = 0;
+	char buffer[sizeof(OPERATION)+TOPIC_SIZE+TEXT_SIZE];
+	char topic[TOPIC_SIZE];
+	char text[TEXT_SIZE];
+	memset(topic, '\0', sizeof(topic));
+	memset(text, '\0', sizeof(text));
 
 	pthread_mutex_lock(&mutex);
 	s_local = *s;
@@ -42,6 +50,33 @@ void *manage_request (int* s) {
 
 	/* Request management */
 
+	if(read(*s, buffer, sizeof(buffer)) < 0){
+		perror("Broker error: error reading message");
+	}
+
+	for(int i = 0; buffer[i]!='\0'; i++){ // Advance until reach topic
+		position++;
+	}
+
+	position++;
+
+	for(int i = position; buffer[i]!='\0'; i++){ // Advance until end topic
+		topic[aux] = buffer[i];
+		aux++;
+		position++;
+	}
+
+	aux = 0;
+	position++;
+
+	for(int i = position; buffer[i]!='\0'; i++){ // Advance until end of buffer content
+		text[aux] = buffer[i];
+		aux++;
+		position++;
+	}
+
+	printf("Topic: %s\n", topic);
+	printf("Text: %s\n", text);
 
 	/* End of request management */
 
@@ -74,6 +109,7 @@ int main(int argc, char *argv[])
 	}
 
 	printf("Port: %s\n", port);
+	
 
 	/* Server socket initialization */
 
@@ -125,8 +161,6 @@ int main(int argc, char *argv[])
 	}
 
 	for(;;) {
-
-			printf("This is reached\n");
 
 		if ((sc = accept(sd, (struct sockaddr *) &client_addr, (socklen_t*)&client_len)) < 0) {
 			perror("Broker error: Request could not be accepted");
