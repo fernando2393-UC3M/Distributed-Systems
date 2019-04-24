@@ -9,7 +9,7 @@
 typedef struct Node
 {
     int key;
-    char * topics [128];
+    char * topics [TOPIC_SIZE];
     struct Node *next; // Next node
 } Node;
 
