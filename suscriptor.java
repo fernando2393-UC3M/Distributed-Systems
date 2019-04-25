@@ -34,6 +34,7 @@ class suscriptor {
 
 				System.out.println("c> MESSAGE FROM " + topictext);
 
+				listen.close();
 				serversock.close();
 			}
 
@@ -72,40 +73,39 @@ class suscriptor {
 		return 0;
 	}
 
-	static int unsubscribe(String topic)
-	{
+	static int unsubscribe(String topic) {
 		// Write your code here
 		System.out.println("Unsubscribe from: " + topic);
-		//Connection
-		try{
-			Socket sc = new Socket(host, _port)
+		// Connection
+		try {
+			Socket sc = new Socket(host, _port);
 			DataOutputStream ostream = new DataOutputStream(sc.getOutputStream());
 			// Send SUSCRIBE to server
-			ostream.writeBytes("UNSUBSCRIBE" +"\0");
+			ostream.writeBytes("UNSUBSCRIBE" + "\0");
 			// Send topic to server
-			ostream.writeBytes(topic +"\0");
-			//receive response
+			ostream.writeBytes(topic + "\0");
+			// receive response
 			DataInputStream istream = new DataInputStream(sc.getInputStream());
 			BufferedReader r = new BufferedReader(new InputStreamReader(istream));
 			String res = r.readLine();
 
-			if(res.equals("-1")) {
-				 System.out.println("c> UNSUBSCRIBE FAIL");
-				 sc.close();
-				 return -1;
-			 //topic was not subscibed
-		 } else if (res.equals("USER_error")) {
-				 System.out.println("c> TOPIC NOT SUBSCRIBED");
-				 sc.close();
-				 return -1;
-		 }else{
-				 sc.close();
-				 System.out.println("c> UNSUBSCRIBE OK");
-				 unsub = topic;
-	 	 }
-	}catch(Exception e) {
-		System.err.println("Error in the connection to the broker " + host + _port);
-	}
+			if (res.equals("-1")) {
+				System.out.println("c> UNSUBSCRIBE FAIL");
+				sc.close();
+				return -1;
+				// topic was not subscibed
+			} else if (res.equals("USER_error")) {
+				System.out.println("c> TOPIC NOT SUBSCRIBED");
+				sc.close();
+				return -1;
+			} else {
+				sc.close();
+				System.out.println("c> UNSUBSCRIBE OK");
+				unsub = topic;
+			}
+		} catch (Exception e) {
+			System.err.println("Error in the connection to the broker " + host + _port);
+		}
 		return 0;
 	}
 
