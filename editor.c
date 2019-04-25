@@ -8,11 +8,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <arpa/inet.h>
-
-#define TOPIC_SIZE 128
-#define TEXT_SIZE 1024
-#define OPERATION "PUBLISH"
-
+#include "constants.h"
 
 void print_usage() {
 	printf("Usage: editor -h host -p port -t \"topic\" -m \"text\"\n");
@@ -139,7 +135,7 @@ int main(int argc, char *argv[]) {
 		final_text[i]=text[i];
 	}
 
-	if (send(sd, OPERATION, sizeof(OPERATION), 0) == -1) {
+	if (send(sd, OPERATION_PUBLISH, sizeof(OPERATION_PUBLISH), 0) == -1) {
 		perror("Error sending operation code");
 		return -1;
 	}

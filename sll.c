@@ -1,8 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "constants.h"
 
-#define TOPIC_SIZE 128
+/* List of topics */
+
+char * topiclist [TOPIC_SIZE];
 
 /* SSL Definition */
 
@@ -13,7 +16,7 @@ typedef struct Node
     struct Node *next; // Next node
 } Node;
 
-Node *head;
+Node *head; // Head node of list
 
 int removeList()
 {
@@ -179,4 +182,14 @@ int getCardinality() {
     }
 
     return counter;
+}
+
+int isSubscribed(Node * node, char * topic) {
+
+    for(int i = 0; node->topics[i] != NULL; i++){
+        if(!strcmp(node->topics[i], topic)){
+            return 0;
+        }
+    }
+    return -1;
 }

@@ -7,18 +7,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <pthread.h>
-
-/* Constants */
-
-#define FALSE 0
-#define TRUE 1
-#define MAX_CONNECTIONS 3
-
-/* Editor packet components size */
-
-#define TOPIC_SIZE 128
-#define TEXT_SIZE 1024
-#define OPERATION "PUBLISH"
+#include "sll.c"
+#include "constants.h"
 
 /* Thread variables */
 
@@ -36,7 +26,8 @@ void *manage_request (int* s) {
 	int s_local;
 	int position = 0;
 	int aux = 0;
-	char buffer[sizeof(OPERATION)+TOPIC_SIZE+TEXT_SIZE];
+	char buffer[sizeof(OPERATION_PUBLISH)+TOPIC_SIZE+TEXT_SIZE];
+	char operation[sizeof(OPERATION_PUBLISH)];
 	char topic[TOPIC_SIZE];
 	char text[TEXT_SIZE];
 	memset(topic, '\0', sizeof(topic));
@@ -55,28 +46,61 @@ void *manage_request (int* s) {
 	}
 
 	for(int i = 0; buffer[i]!='\0'; i++){ // Advance until reach topic
+		operation[i] = buffer[i];
 		position++;
 	}
 
-	position++;
+	if(!strcmp(operation, OPERATION_PUBLISH)){
 
-	for(int i = position; buffer[i]!='\0'; i++){ // Advance until end topic
-		topic[aux] = buffer[i];
-		aux++;
 		position++;
-	}
 
-	aux = 0;
-	position++;
+		for (int i = position; buffer[i] != '\0'; i++) // Extract topic
+		{ // Advance until end topic
+			topic[aux] = buffer[i];
+			aux++;
+			position++;
+		}
 
-	for(int i = position; buffer[i]!='\0'; i++){ // Advance until end of buffer content
-		text[aux] = buffer[i];
-		aux++;
+		aux = 0;
 		position++;
-	}
 
-	printf("Topic: %s\n", topic);
-	printf("Text: %s\n", text);
+		for (int i = position; buffer[i] != '\0'; i++) // Extract text
+		{ // Advance until end of buffer content
+			text[aux] = buffer[i];
+			aux++;
+			position++;
+		}
+
+		/* Check if topic is in the topic list, if not, add */
+
+		int check = FALSE;
+		int counter = 0;
+
+		for (int i = 0; topiclist[i] != NULL; i++)
+		{ // If it is in list, confirm
+			if (!strcmp(topic, topiclist[i]))
+			{
+				check = TRUE; // Set to true the checker
+			}
+			counter++; // Count the number of elements in list
+		}
+
+		if (check == FALSE)
+		{ // If it is not in the list, include
+			topiclist[counter] = malloc(sizeof(topic));
+			strcpy(topiclist[counter], topic);
+		}
+
+		/* End of topic check */
+
+		/* Now send the message to all who are subscribed to the topic */
+
+		for(Node * dummy = head; dummy != NULL; dummy = dummy->next) {
+			if(isSubscribed(dummy, topic) == 0){
+				send(dummy->key, text, sizeof(text), 0); // Send topic text to all subscribed
+			}
+		}
+	}
 
 	/* End of request management */
 
