@@ -8,21 +8,18 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <arpa/inet.h>
-
-#define TOPIC_SIZE 128
-#define TEXT_SIZE 1024
-
+#include "constants.h"
 
 void print_usage() {
-	    printf("Usage: editor -h host -p port -t \"topic\" -m \"text\"\n");
+	printf("Usage: editor -h host -p port -t \"topic\" -m \"text\"\n");
 }
 
 int main(int argc, char *argv[]) {
 	int  option = 0;
 	char host[256]= "";
 	char port[256]= "";
-	char topic[256]= "";
-	char text[1024]= "";
+	char topic[TOPIC_SIZE]= "";
+	char text[TEXT_SIZE]= "";
 
 	memset(topic, '\0', sizeof(topic)); // Add \0 in the end of string
 	memset(text, '\0', sizeof(text)); // Add \0 in the end of string
@@ -70,10 +67,7 @@ int main(int argc, char *argv[]) {
 	printf("Port: %s\n", port);
 	printf("Topic: %s\n", topic);
 	printf("Text: %s\n", text);
-	char packet [TOPIC_SIZE + TEXT_SIZE + 1]; // 1 added due to the separation topic:text
-	memset(packet, '\0', sizeof(packet));
-	sprintf(packet, "%s:%s", topic, text);
-	printf("Packet to be sent: %s\n", packet);
+
 	/*Socket creation*/
 	int sd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	
@@ -85,17 +79,17 @@ int main(int argc, char *argv[]) {
 
 	bzero((char *)&server_address, sizeof(server_address));
 	
-	hp = gethostbyname(argv[2]);
+	hp = gethostbyname(host);
 	memcpy(&(server_address.sin_addr), hp->h_addr, hp->h_length);
 
 	server_address.sin_family = AF_INET;
-	server_address.sin_port = htons(atoi(argv[4])); 
+	server_address.sin_port = htons(atoi(port)); 
 
 	/*Connection*/
 
 	if (connect(sd, (struct sockaddr *)&server_address, sizeof(server_address)) < 0)
 	{
-		fprintf(stderr, "Error in the connection to the server %s:%s", host, port);
+		fprintf(stderr, "Error in the connection to the server %s:%s\n", host, port);
 		return -1;
 	}
 	else
@@ -103,12 +97,60 @@ int main(int argc, char *argv[]) {
 		printf("Successfully connected to the server\n");
 	}
 
+	/* Editor communication */
+
 	/* Send packet to broker */
 
-	if (send(sd, packet, sizeof(packet), 0) == -1) {
-		perror("Error sending packet");
+	/* Get topic length */
+
+	int counter = 1; // Due to '\0'
+
+	for(int i = 0; i<TOPIC_SIZE; i++) {
+		if(topic[i] != '\0'){
+			counter++;
+		}
+	}
+
+	char final_topic[counter];
+	memset(final_topic, '\0', sizeof(final_topic));
+
+	for(int i = 0; i<sizeof(final_topic); i++){
+		final_topic[i]=topic[i];
+	}
+
+	/* Get text length */
+
+	counter = 1; // Due to '\0'
+
+	for(int i = 0; i<TEXT_SIZE; i++) {
+		if(text[i] != '\0'){
+			counter++;
+		}
+	}
+
+	char final_text[counter];
+	memset(final_text, '\0', sizeof(final_text));
+
+	for(int i = 0; i<sizeof(final_text); i++){
+		final_text[i]=text[i];
+	}
+
+	if (send(sd, OPERATION_PUBLISH, sizeof(OPERATION_PUBLISH), 0) == -1) {
+		perror("Error sending operation code");
 		return -1;
 	}
+
+	if (send(sd, final_topic, sizeof(final_topic), 0) == -1) {
+		perror("Error sending topic");
+		return -1;
+	}
+
+	if (send(sd, final_text, sizeof(final_text), 0) == -1) {
+		perror("Error sending text");
+		return -1;
+	}
+
+	printf("All messages have been sent\n");
 
 	return 0;
 }
