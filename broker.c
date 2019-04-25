@@ -132,18 +132,37 @@ void *manage_request (int* s) {
 			position++;
 		}
 
-		if(getNode(client_socket)==NULL) // Node does not exist --> Include
+		int check = FALSE;
+
+		for (int i = 0; topiclist[i] != NULL; i++) // Check if the topic exists
+		{ 
+			if (!strcmp(topic, topiclist[i]))
+			{
+				check = TRUE; // Set to true the checker
+				break;
+			}
+		}
+
+		if(check==FALSE) // If topic to subscribe does not exist
+		{
+			perror("Broker error: topic does not exist");
+		}
+
+		else if(getNode(client_socket)==NULL && check==TRUE) // Node does not exist but topic does --> Include
 		{ 
 			Node * node = createNewNode(client_socket, topic); // Create new node
 			setNode(node); // Add node to the list
 
 		}
-		else {
+		else if(getNode(client_socket)!=NULL && check==TRUE){
 
 			Node * node = getNode(client_socket);
 			if(isSubscribed(node, topic)<0)
 			{				
 				addTopic(node, topic);
+			}
+			else {
+				perror("Broker error: subscriber already subscribed to topic");
 			}
 		}
 	}
