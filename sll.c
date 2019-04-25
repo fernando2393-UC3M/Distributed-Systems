@@ -3,10 +3,6 @@
 #include <string.h>
 #include "constants.h"
 
-/* List of topics */
-
-char * topiclist [TOPIC_SIZE];
-
 /* SSL Definition */
 
 typedef struct Node

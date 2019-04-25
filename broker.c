@@ -10,6 +10,10 @@
 #include "sll.c"
 #include "constants.h"
 
+/* List of topics */
+
+char * topiclist [TOPIC_SIZE];
+
 /* Thread variables */
 
 pthread_mutex_t mutex;
@@ -79,13 +83,13 @@ void *manage_request (int* s) {
 		int check = FALSE;
 		int counter = 0;
 
-		for (int i = 0; topiclist[i] != NULL; i++)
-		{ // If it is in list, confirm
-			if (!strcmp(topic, topiclist[i]))
-			{
+		while(topiclist[counter]!=NULL){
+			if (!strcmp(topic, topiclist[counter]))
+			{	
 				check = TRUE; // Set to true the checker
+				break;
 			}
-			counter++; // Count the number of elements in list
+			counter++;
 		}
 
 		if (check == FALSE)
