@@ -7,10 +7,9 @@ class suscriptor {
 
 	/********************* TYPES **********************/
 
-
 	/******************* ATTRIBUTES *******************/
 
-	private static String _server   = null;
+	private static String _server = null;
 	private static short _port = -1;
 	private static int _serverport = -1;
 	private static String topic = null;
@@ -24,52 +23,52 @@ class suscriptor {
 		try {
 			ServerSocket listen = new ServerSocket(_serverport);
 
-			//infinite loop that will stop when user unsubscribes a topic
-			while(!loopend || !unsub.equals(topic)) {
+			// infinite loop that will stop when user unsubscribes a topic
+			while (!loopend || !unsub.equals(topic)) {
 				// Waiting for requests
-		       	Socket serversock = listen.accept();
-		       	// Processing requests
-		        BufferedReader d = new BufferedReader(new InputStreamReader(serversock.getInputStream()));
-		        // saving
-		        String topictext = d.readLine();
+				Socket serversock = listen.accept();
+				// Processing requests
+				BufferedReader d = new BufferedReader(new InputStreamReader(serversock.getInputStream()));
+				// saving
+				String topictext = d.readLine();
 
-		       	System.out.println("c> MESSAGE FROM " + topictext);
+				System.out.println("c> MESSAGE FROM " + topictext);
 
-		       	serversock.close();
+				serversock.close();
 			}
 
-		} catch(RuntimeException e) {
+		} catch (RuntimeException e) {
 			System.err.println("c> NETWORK ERROR" + e.toString());
+		}
 	}
-}
-	static int subscribe(String topic)
-	{
+
+	static int subscribe(String topic) {
 		// Write your code here
 
 		System.out.println("Subscribe to: " + topic);
-    //Connection
-		try{
-		Socket sc = new Socket(host, _port);
-		//choose port to listen
-		_serverport = 55555; // not sure what is the port to connect to
-		String sevport = String.valueOf(_serverport);
-		//reply
-		BufferedReader in = null;
-		String res = in.readLine();
-		unsub = null;
-		if(res.equals("-1")) {
-			System.out.println("c> SUBSCRIBE FAIL");
-			return -1;
-		} else {
-			System.out.println("c> SUBSCRIBE OK");
-			Thread listener = new Thread(new suscriptor(_serverport, topic));
-			listener.setDaemon(true);
-			listener.start();
+		// Connection
+		try {
+			Socket sc = new Socket(host, _port);
+			// choose port to listen
+			_serverport = 55555; // not sure what is the port to connect to
+			String sevport = String.valueOf(_serverport);
+			// reply
+			BufferedReader in = null;
+			String res = in.readLine();
+			unsub = null;
+			if (res.equals("-1")) {
+				System.out.println("c> SUBSCRIBE FAIL");
+				return -1;
+			} else {
+				System.out.println("c> SUBSCRIBE OK");
+				Thread listener = new Thread(new suscriptor(_serverport, topic));
+				listener.setDaemon(true);
+				listener.start();
+			}
+			sc.close();
+		} catch (Exception e) {
+			System.err.println("Error in the connection to the broker " + host + _port);
 		}
-		sc.close();
-	}catch(Exception e) {
-		System.err.println("Error in the connection to the broker " + host + _port);
-	}
 		return 0;
 	}
 
@@ -110,16 +109,14 @@ class suscriptor {
 		return 0;
 	}
 
-
-
 	/**
-	 * @brief Command interpreter for the suscriptor. It calls the protocol functions.
+	 * @brief Command interpreter for the suscriptor. It calls the protocol
+	 *        functions.
 	 */
-	static void shell()
-	{
+	static void shell() {
 		boolean exit = false;
 		String input;
-		String [] line;
+		String[] line;
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
 		while (!exit) {
@@ -131,7 +128,7 @@ class suscriptor {
 				if (line.length > 0) {
 					/*********** SUBSCRIBE *************/
 					if (line[0].equals("SUBSCRIBE")) {
-						if  (line.length == 2) {
+						if (line.length == 2) {
 							subscribe(line[1]); // topic = line[1]
 						} else {
 							System.out.println("Syntax error. Usage: SUBSCRIBE <topic>");
@@ -140,15 +137,15 @@ class suscriptor {
 
 					/********** UNSUBSCRIBE ************/
 					else if (line[0].equals("UNSUBSCRIBE")) {
-						if  (line.length == 2) {
+						if (line.length == 2) {
 							unsubscribe(line[1]); // topic = line[1]
 						} else {
 							System.out.println("Syntax error. Usage: UNSUBSCRIBE <topic>");
 						}
-                    }
+					}
 
-                    /************** QUIT **************/
-                    else if (line[0].equals("QUIT")){
+					/************** QUIT **************/
+					else if (line[0].equals("QUIT")) {
 						if (line.length == 1) {
 							exit = true;
 						} else {
@@ -171,38 +168,36 @@ class suscriptor {
 	/**
 	 * @brief Prints program usage
 	 */
-	static void usage()
-	{
+	static void usage() {
 		System.out.println("Usage: java -cp . suscriptor -s <server> -p <port>");
 	}
 
 	/**
 	 * @brief Parses program execution arguments
 	 */
-	static boolean parseArguments(String [] argv)
-	{
+	static boolean parseArguments(String[] argv) {
 		Getopt g = new Getopt("suscriptor", argv, "ds:p:");
 
 		int c;
 		String arg;
 
 		while ((c = g.getopt()) != -1) {
-			switch(c) {
-				//case 'd':
-				//	_debug = true;
-				//	break;
-				case 's':
-					_server = g.getOptarg();
-					break;
-				case 'p':
-					arg = g.getOptarg();
-					_port = Short.parseShort(arg);
-					break;
-				case '?':
-					System.out.print("getopt() returned " + c + "\n");
-					break; // getopt() already printed an error
-				default:
-					System.out.print("getopt() returned " + c + "\n");
+			switch (c) {
+			// case 'd':
+			// _debug = true;
+			// break;
+			case 's':
+				_server = g.getOptarg();
+				break;
+			case 'p':
+				arg = g.getOptarg();
+				_port = Short.parseShort(arg);
+				break;
+			case '?':
+				System.out.print("getopt() returned " + c + "\n");
+				break; // getopt() already printed an error
+			default:
+				System.out.print("getopt() returned " + c + "\n");
 			}
 		}
 
@@ -217,17 +212,13 @@ class suscriptor {
 		return true;
 	}
 
-
-
 	/********************* MAIN **********************/
 
-	public static void main(String[] argv)
-	{
-		if(!parseArguments(argv)) {
+	public static void main(String[] argv) {
+		if (!parseArguments(argv)) {
 			usage();
 			return;
 		}
-
 
 		// Write code here
 
