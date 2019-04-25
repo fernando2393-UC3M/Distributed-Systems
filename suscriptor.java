@@ -2,6 +2,7 @@ import java.io.*;
 import java.lang.*;
 import java.net.*;
 import java.util.*;
+import gnu.getopt.Getopt;
 
 class suscriptor {
 
@@ -48,12 +49,28 @@ class suscriptor {
 
 		System.out.println("Subscribe to: " + topic);
 		// Connection
+		String host = _server;
 		try {
 			Socket sc = new Socket(host, _port);
+			PrintWriter o = null;
+			o = new PrintWriter(new OutputStreamWriter(sc.getOutputStream()));
 			// choose port to listen
 			_serverport = 55555; // not sure what is the port to connect to
-			String sevport = String.valueOf(_serverport);
+			String serport = String.valueOf(_serverport);
 			// reply
+			//DataOutputStream ostream = new DataOutputStream(sc.getOutputStream);
+
+			o.print("SUBSCRIBE\0");
+			o.flush();
+
+			o.print(serport + "\0");
+			o.flush();
+
+			o.print(topic + "\0");
+			o.flush();
+
+
+
 			BufferedReader in = null;
 			String res = in.readLine();
 			unsub = null;
@@ -62,11 +79,12 @@ class suscriptor {
 				return -1;
 			} else {
 				System.out.println("c> SUBSCRIBE OK");
-				Thread listener = new Thread(new suscriptor(_serverport, topic));
+				Thread listener = new Thread(_serverport, topic);
 				listener.setDaemon(true);
 				listener.start();
 			}
 			sc.close();
+
 		} catch (Exception e) {
 			System.err.println("Error in the connection to the broker " + host + _port);
 		}
@@ -77,6 +95,7 @@ class suscriptor {
 		// Write your code here
 		System.out.println("Unsubscribe from: " + topic);
 		// Connection
+		String host = _server;
 		try {
 			Socket sc = new Socket(host, _port);
 			DataOutputStream ostream = new DataOutputStream(sc.getOutputStream());
