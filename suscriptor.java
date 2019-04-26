@@ -4,7 +4,7 @@ import java.net.*;
 import java.util.*;
 import gnu.getopt.Getopt;
 
-class suscriptor {
+class suscriptor implements Runnable{
 
 	/********************* TYPES **********************/
 
@@ -17,10 +17,12 @@ class suscriptor {
 	private static String unsub = null;
 
 	/********************* METHODS ********************/
-	//thread method
-	public void receive() throws RuntimeException {
-		this._serverport = _serverport;
-		this.topic = topic;
+	//thread methods
+	public suscriptor (String topic, int _serverport) {
+	    this.topic = topic;
+	    this._serverport = _serverport;
+	  }
+	public void run() throws RuntimeException {
 		try {
 			ServerSocket sc = new ServerSocket(_serverport);
 
@@ -46,6 +48,8 @@ class suscriptor {
 
 		} catch (RuntimeException e) {
 			System.err.println("c> NETWORK ERROR" + e.toString());
+		} catch(IOException e) {
+			System.err.println("Error in the connection to the broker " + _server + _serverport + e.toString());
 		}
 	}
 
@@ -61,7 +65,7 @@ class suscriptor {
 			o = new PrintWriter(new OutputStreamWriter(sc.getOutputStream()));
 			// choose port to listen
 			ServerSocket s = new ServerSocket(0);//crear port 0, usara uno libre y hay que cogerlo de ahi
-			_serverport = s.getPort();
+			_serverport = s.getLocalPort();
 			String serport = String.valueOf(_serverport);
 			// reply
 			DataOutputStream os = new DataOutputStream(sc.getOutputStream());
@@ -85,7 +89,7 @@ class suscriptor {
 				return -1;
 			} else {
 				System.out.println("c> SUBSCRIBE OK");
-				Thread t = new Thread(new receive());
+				Thread t = new Thread(new suscriptor(topic, _serverport));
 				//prevent thread from exiting when the progamm finishes
 				t.setDaemon(true);
 				t.start();
