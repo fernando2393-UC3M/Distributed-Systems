@@ -14,28 +14,33 @@ class suscriptor {
 	private static short _port = -1;
 	private static int _serverport = -1;
 	private static String topic = null;
-	private static boolean loopend = false;
 	private static String unsub = null;
 
 	/********************* METHODS ********************/
+	//thread method
 	public void receive() throws RuntimeException {
-		String t = topic;
-
+		this._serverport = _serverport;
+		this.topic = topic;
 		try {
-			ServerSocket listen = new ServerSocket(_serverport);
+			ServerSocket sc = new ServerSocket(_serverport);
 
 			// infinite loop that will stop when user unsubscribes a topic
-			while (!loopend || !unsub.equals(topic)) {
+			while (!unsub.equals(topic)) { //boolean
 				// Waiting for requests
-				Socket serversock = listen.accept();
+				Socket serversock = sc.accept();
 				// Processing requests
-				BufferedReader d = new BufferedReader(new InputStreamReader(serversock.getInputStream()));
+				BufferedReader tp = new BufferedReader(new InputStreamReader(serversock.getInputStream()));
 				// saving
-				String topictext = d.readLine();
+				String topicrec = tp.readLine();
+				// Processing requests
+				BufferedReader tx = new BufferedReader(new InputStreamReader(serversock.getInputStream()));
+				// saving
+				String textrec = tx.readLine();
 
-				System.out.println("c> MESSAGE FROM " + topictext);
 
-				listen.close();
+				System.out.println("c> MESSAGE FROM " + topicrec + " : " + textrec);
+
+				sc.close();
 				serversock.close();
 			}
 
@@ -55,19 +60,20 @@ class suscriptor {
 			PrintWriter o = null;
 			o = new PrintWriter(new OutputStreamWriter(sc.getOutputStream()));
 			// choose port to listen
-			_serverport = 55555; // not sure what is the port to connect to
+			ServerSocket s = new ServerSocket(0);//crear port 0, usara uno libre y hay que cogerlo de ahi
+			_serverport = s.getPort();
 			String serport = String.valueOf(_serverport);
 			// reply
-			//DataOutputStream ostream = new DataOutputStream(sc.getOutputStream);
+			DataOutputStream os = new DataOutputStream(sc.getOutputStream());
 
-			o.print("SUBSCRIBE\0");
-			o.flush();
+			os.writeBytes("SUBSCRIBE\0");
+			os.flush();
 
-			o.print(serport + "\0");
-			o.flush();
+			os.writeBytes(serport + "\0");
+			os.flush();
 
-			o.print(topic + "\0");
-			o.flush();
+			os.writeBytes(topic + "\0");
+			os.flush();
 
 
 
@@ -79,9 +85,10 @@ class suscriptor {
 				return -1;
 			} else {
 				System.out.println("c> SUBSCRIBE OK");
-				Thread listener = new Thread(_serverport, topic);
-				listener.setDaemon(true);
-				listener.start();
+				Thread t = new Thread(new receive());
+				//prevent thread from exiting when the progamm finishes
+				t.setDaemon(true);
+				t.start();
 			}
 			sc.close();
 
@@ -108,18 +115,18 @@ class suscriptor {
 			BufferedReader r = new BufferedReader(new InputStreamReader(istream));
 			String res = r.readLine();
 
-			if (res.equals("-1")) {
+			if (res.equals("2")) {
 				System.out.println("c> UNSUBSCRIBE FAIL");
 				sc.close();
 				return -1;
 				// topic was not subscibed
-			} else if (res.equals("USER_error")) {
+			} else if (res.equals("1")) {
 				System.out.println("c> TOPIC NOT SUBSCRIBED");
 				sc.close();
 				return -1;
-			} else {
-				sc.close();
+			} else if (res.equals("0")){
 				System.out.println("c> UNSUBSCRIBE OK");
+				sc.close();
 				unsub = topic;
 			}
 		} catch (Exception e) {
