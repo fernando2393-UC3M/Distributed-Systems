@@ -9,6 +9,7 @@
 #include <pthread.h>
 #include "sll.c"
 #include "constants.h"
+#include "lines.h"
 
 /* List of topics */
 
@@ -28,15 +29,11 @@ void print_usage()
 void *manage_request (int* s) {
 
 	int s_local;
-	int position = 0;
-	int aux = 0;
 	int client_socket = 0;
-	char buffer[sizeof(OPERATION_PUBLISH)+TOPIC_SIZE+TEXT_SIZE];
-	char operation[sizeof(OPERATION_PUBLISH)];
-	char topic[TOPIC_SIZE];
-	char text[TEXT_SIZE];
-	memset(topic, '\0', sizeof(topic));
-	memset(text, '\0', sizeof(text));
+	char buffer[TEXT_SIZE];
+	char * operation = NULL;
+	char * topic = NULL;
+	char * text = NULL;
 
 	pthread_mutex_lock(&mutex);
 	s_local = *s;
@@ -46,37 +43,38 @@ void *manage_request (int* s) {
 
 	/* Request management */
 
-	if(read(*s, buffer, sizeof(buffer)) < 0){
+	if(readLine(*s, buffer, sizeof(buffer)) < 0){
 		perror("Broker error: error reading message");
 	}
 
-	for(int i = 0; buffer[i]!='\0'; i++){ // Advance until reach topic
-		operation[i] = buffer[i];
-		position++;
-	}
+	/* Read operation */
+
+	operation = malloc(strlen(buffer));
+	strcpy(operation, buffer);
+
+	printf("%s\n", operation);
 
 	/* Case PUBLISH */
 
 	if(!strcmp(operation, OPERATION_PUBLISH)){
 
-		position++;
+		/* Read topic */
 
-		for (int i = position; buffer[i] != '\0'; i++) // Extract topic
-		{ // Advance until end topic
-			topic[aux] = buffer[i];
-			aux++;
-			position++;
+		if(readLine(*s, buffer, sizeof(buffer)) < 0){
+			perror("Broker error: error reading message");
 		}
 
-		aux = 0;
-		position++;
+		topic = malloc(strlen(buffer));
+		strcpy(topic, buffer);
 
-		for (int i = position; buffer[i] != '\0'; i++) // Extract text
-		{ // Advance until end of buffer content
-			text[aux] = buffer[i];
-			aux++;
-			position++;
+		/* Read text */
+
+		if(readLine(*s, buffer, sizeof(buffer)) < 0){
+			perror("Broker error: error reading message");
 		}
+
+		text = malloc(strlen(buffer));
+		strcpy(text, buffer);
 
 		/* Check if topic is in the topic list, if not, add */
 
@@ -102,51 +100,41 @@ void *manage_request (int* s) {
 
 		/* Now send the message to all who are subscribed to the topic */
 
-		for(Node * dummy = head; dummy != NULL; dummy = dummy->next) {
+	/*	for(Node * dummy = head; dummy != NULL; dummy = dummy->next) {
 			if(isSubscribed(dummy, topic) == 0){
 				send(dummy->key, topic, sizeof(topic), 0); // Send topic to all subscribed
 				send(dummy->key, text, sizeof(text), 0); // Send topic text to all subscribed
 			}
-		}
+		}*/
 	}
 
 	/* Case SUBSCRIBE */
 
 	else if(!strcmp(operation, OPERATION_SUBSCRIBE)){
 
-		position++;
-
 		char * socket_buffer = NULL;
 
-		for (int i = position; buffer[i] != '\0'; i++)
-		{ // Advance until end socket
-			aux++;
+		/* Read sent port */
+
+		if(readLine(*s, buffer, sizeof(buffer)) < 0){
+			perror("Broker error: error reading message");
 		}
 
-		socket_buffer = malloc(aux); // malloc with the number of components of socket
-
-		aux = 0;
-
-		for (int i = position; buffer[i] != '\0'; i++)
-		{ // Advance until end socket
-			socket_buffer[aux] = buffer[i];
-			position++;
-			aux++;
-		}
-
-		aux = 0; // Reset value to zero
+		socket_buffer = malloc(strlen(buffer));
+		strcpy(socket_buffer, buffer);
 
 		char * ptr;
 		client_socket = strtol(socket_buffer, &ptr, 10); // Socket of the client
 
-		position++;
 
-		for (int i = position; buffer[i] != '\0'; i++) // Extract topic
-		{ // Advance until end topic
-			topic[aux] = buffer[i];
-			aux++;
-			position++;
+		/* Read topic */
+
+		if(readLine(*s, buffer, sizeof(buffer)) < 0){
+			perror("Broker error: error reading message");
 		}
+
+		topic = malloc(strlen(buffer));
+		strcpy(topic, buffer);
 
 		int check = FALSE;
 
@@ -160,11 +148,13 @@ void *manage_request (int* s) {
 		}
 
 		if(check==FALSE) // If topic to subscribe does not exist
-		{
+		{	
+			char * ans = "-1";
 			perror("Broker error: topic does not exist");
+			send(client_socket, ans, sizeof(ans), 0);
 		}
 
-		else if(getNode(client_socket)==NULL && check==TRUE) // Node does not exist but topic does --> Include
+		/*else if(getNode(client_socket)==NULL && check==TRUE) // Node does not exist but topic does --> Include
 		{ 
 			Node * node = createNewNode(client_socket, topic); // Create new node
 			setNode(node); // Add node to the list
@@ -180,53 +170,41 @@ void *manage_request (int* s) {
 			else {
 				perror("Broker error: subscriber already subscribed to topic");
 			}
-		}
+		}*/
 	}
 
 	/* Case UNSUBSCRIBE */
 
 	else if(!strcmp(operation, OPERATION_UNSUBSCRIBE)){
 
-		position++;
-
 		char * socket_buffer = NULL;
 
-		for (int i = position; buffer[i] != '\0'; i++)
-		{ // Advance until end socket
-			aux++;
+		/* Read sent port */
+
+		if(readLine(*s, buffer, sizeof(buffer)) < 0){
+			perror("Broker error: error reading message");
 		}
 
-		socket_buffer = malloc(aux); // malloc with the number of components of socket
-
-		aux = 0;
-
-		for (int i = position; buffer[i] != '\0'; i++)
-		{ // Advance until end socket
-			socket_buffer[aux] = buffer[i];
-			position++;
-			aux++;
-		}
-
-		aux = 0; // Reset value to zero
+		socket_buffer = malloc(strlen(buffer));
+		strcpy(socket_buffer, buffer);
 
 		char * ptr;
 		client_socket = strtol(socket_buffer, &ptr, 10); // Socket of the client
 
-		Node * node = getNode(client_socket);
+		/* Read topic */
 
-		position++;
-
-		for (int i = position; buffer[i] != '\0'; i++) // Extract topic
-		{ // Advance until end topic
-			topic[aux] = buffer[i];
-			aux++;
-			position++;
+		if(readLine(*s, buffer, sizeof(buffer)) < 0){
+			perror("Broker error: error reading message");
 		}
 
-		if(isSubscribed(node, topic)==0)
+		topic = malloc(strlen(buffer));
+		strcpy(topic, buffer);
+
+
+		/*if(isSubscribed(node, topic)==0)
 		{
 			removeTopic(node, topic);
-		}
+		}*/
 	}
 
 	/* End of request management */

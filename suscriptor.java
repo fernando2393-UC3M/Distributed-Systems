@@ -64,8 +64,8 @@ class suscriptor implements Runnable{
 			PrintWriter o = null;
 			o = new PrintWriter(new OutputStreamWriter(sc.getOutputStream()));
 			// choose port to listen
-			ServerSocket s = new ServerSocket(0);//crear port 0, usara uno libre y hay que cogerlo de ahi
-			_serverport = s.getLocalPort();
+			ServerSocket s = new ServerSocket(0); // Using 0 this will get a free random port
+			_serverport = s.getLocalPort(); // or getPort()
 			String serport = String.valueOf(_serverport);
 			// reply
 			DataOutputStream os = new DataOutputStream(sc.getOutputStream());
@@ -97,7 +97,7 @@ class suscriptor implements Runnable{
 			sc.close();
 
 		} catch (Exception e) {
-			System.err.println("Error in the connection to the broker " + host + _port);
+			System.err.println("Error in the connection to the broker " + host + " : " + _port);
 		}
 		return 0;
 	}

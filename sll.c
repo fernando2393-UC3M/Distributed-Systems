@@ -2,12 +2,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include "constants.h"
+#include <sys/socket.h>
 
 /* SSL Definition */
 
 typedef struct Node
 {
-    int key; // Change to sock addr and store, as in client, which will be unique
+    struct sockaddr_in key; // Change to sock addr and store, as in client, which will be unique
     char * topics [TOPIC_SIZE];
     struct Node *next; // Next node
 } Node;
@@ -32,7 +33,7 @@ int removeList()
     return 0;
 }
 
-Node * createNewNode(int key, char *topic){
+Node * createNewNode(struct sockaddr_in key, char *topic){
 
     Node* newNode = (Node*)malloc(sizeof(Node));
 
@@ -70,7 +71,7 @@ int setNode(Node * node)
     return 0;
 }
 
-Node *getNode(int key)
+Node *getNode(struct sockaddr_in key)
 {
 
     Node *dummy = head;
@@ -81,7 +82,7 @@ Node *getNode(int key)
 
     while (dummy != NULL)
     {
-        if(dummy->key == key){
+        if((dummy->key.sin_port == key.sin_port) && (dummy->key.sin_addr.s_addr == key.sin_addr.s_addr)){ // If port is the same and address is also the same
             return dummy;
         }
         dummy = dummy->next;
@@ -134,13 +135,13 @@ void removeTopic(Node *node, char *topic)
 	}
 }
 
-int deleteByKey(int key) {
+int deleteByKey(struct sockaddr_in key) {
 
     Node* dummy = head;
 
     /* First check of head */
 
-    if(dummy->key == key) {
+    if((dummy->key.sin_port == key.sin_port) && (dummy->key.sin_addr.s_addr == key.sin_addr.s_addr)){ // If port is the same and address is also the same
                 head = dummy->next;
                 free(dummy);
                 return 0;
@@ -153,7 +154,7 @@ int deleteByKey(int key) {
     dummy = dummy->next;
 
     while(dummy != NULL) {
-        if(dummy->key == key) {
+        if((dummy->key.sin_port == key.sin_port) && (dummy->key.sin_addr.s_addr == key.sin_addr.s_addr)){ // If port is the same and address is also the same
 
             prev_dummy->next = dummy->next;
 
