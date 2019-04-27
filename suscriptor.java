@@ -63,14 +63,18 @@ class suscriptor implements Runnable{
 			Socket sc = new Socket(host, _port);
 			PrintWriter o = null;
 			o = new PrintWriter(new OutputStreamWriter(sc.getOutputStream()));
-			// choose port to listen
-			ServerSocket s = new ServerSocket(0); // Using 0 this will get a free random port
-			_serverport = s.getLocalPort(); // or getPort()
+
+			// choose port to listen if one not already set
+			if(_serverport == -1){
+				ServerSocket s = new ServerSocket(0); // Using 0 this will get a free random port
+				_serverport = s.getLocalPort(); // or getPort()
+			}
+
 			String serport = String.valueOf(_serverport);
 			// reply
 			DataOutputStream os = new DataOutputStream(sc.getOutputStream());
 
-			os.writeBytes("SUBSCRIBE\0");
+			os.writeBytes("SUBSCRIBE" + "\0");
 			os.flush();
 
 			os.writeBytes(serport + "\0");
@@ -109,11 +113,27 @@ class suscriptor implements Runnable{
 		String host = _server;
 		try {
 			Socket sc = new Socket(host, _port);
+
+			// choose port to listen if one not already set
+			if(_serverport == -1){
+				ServerSocket s = new ServerSocket(0); // Using 0 this will get a free random port
+				_serverport = s.getLocalPort(); // or getPort()
+			}
+
 			DataOutputStream ostream = new DataOutputStream(sc.getOutputStream());
-			// Send SUSCRIBE to server
+
+			// Send UNSUBSCRIBE to server
 			ostream.writeBytes("UNSUBSCRIBE" + "\0");
+			os.flush();
+
+			// Send port to server
+			os.writeBytes(serport + "\0");
+			os.flush();
+
 			// Send topic to server
 			ostream.writeBytes(topic + "\0");
+			os.flush();
+			
 			// receive response
 			DataInputStream istream = new DataInputStream(sc.getInputStream());
 			BufferedReader r = new BufferedReader(new InputStreamReader(istream));

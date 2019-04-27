@@ -125,7 +125,7 @@ void *manage_request (int* s) {
 
 		char * ptr;
 		client_socket = strtol(socket_buffer, &ptr, 10); // Socket of the client
-
+		printf("Client port: %d\n", client_socket);
 
 		/* Read topic */
 
