@@ -120,10 +120,12 @@ class suscriptor implements Runnable{
 				_serverport = s.getLocalPort(); // or getPort()
 			}
 
-			DataOutputStream ostream = new DataOutputStream(sc.getOutputStream());
+			String serport = String.valueOf(_serverport);
+
+			DataOutputStream os = new DataOutputStream(sc.getOutputStream());
 
 			// Send UNSUBSCRIBE to server
-			ostream.writeBytes("UNSUBSCRIBE" + "\0");
+			os.writeBytes("UNSUBSCRIBE" + "\0");
 			os.flush();
 
 			// Send port to server
@@ -131,9 +133,9 @@ class suscriptor implements Runnable{
 			os.flush();
 
 			// Send topic to server
-			ostream.writeBytes(topic + "\0");
+			os.writeBytes(topic + "\0");
 			os.flush();
-			
+
 			// receive response
 			DataInputStream istream = new DataInputStream(sc.getInputStream());
 			BufferedReader r = new BufferedReader(new InputStreamReader(istream));
