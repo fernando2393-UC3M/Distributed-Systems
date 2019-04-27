@@ -3,15 +3,11 @@
 #include <string.h>
 #include "constants.h"
 
-/* List of topics */
-
-char * topiclist [TOPIC_SIZE];
-
 /* SSL Definition */
 
 typedef struct Node
 {
-    int key;
+    int key; // Change to sock addr and store, as in client, which will be unique
     char * topics [TOPIC_SIZE];
     struct Node *next; // Next node
 } Node;
@@ -94,42 +90,48 @@ Node *getNode(int key)
     return NULL;
 }
 
-int modifyNode(Node * node){
+void addTopic(Node *node, char *topic)
+{
+    int counter = 0;
 
-    Node * dummy = head;
-
-    while(dummy != NULL){
-        if(dummy->key == node->key){
-
-            int counter = 0;
-
-            for(int i = counter; node->topics[i]!=NULL; i++){
-                if(dummy->topics[i]!=NULL){
-
-                    if (strlen(dummy->topics[i]) != strlen(node->topics[i])){ // If sizes are different, free and allocate with new size
-                        free(dummy->topics[i]);
-                        dummy->topics[i] = malloc(sizeof(node->topics[i]));
-                    }
-                    strcpy(dummy->topics[i], node->topics[i]); // Copy new version of the node
-                    counter++;
-                }
-                else{
-                    dummy->topics[i] = malloc(sizeof(node->topics[i])); // Allocate space for new topics
-                    strcpy(dummy->topics[i], node->topics[i]);
-                    counter++;
-                }
-            }
-
-            for(int i = counter; dummy->topics[i]!=NULL; i++){ // Free topics which do not appear in updated node
-                free(dummy->topics[i]);
-            }
-            return 0;
-        }
-
-        dummy = dummy->next;
+    for(int i = 0; node->topics[i]!=NULL; i++){
+        counter++;        
     }
+    counter++;
+    node->topics[counter] = malloc(TOPIC_SIZE);
+    strcpy(node->topics[counter], topic);
+}
 
-    return -1;
+void removeTopic(Node *node, char *topic)
+{
+	int counter = 0;
+
+	for (int i = 0; node->topics[i] != NULL; i++)
+	{
+		if (!strcmp(node->topics[i], topic))
+		{
+			counter = i;
+			break;
+		}
+	}
+	counter++;
+
+	if (node->topics[counter] == NULL)
+	{
+		node->topics[counter - 1] = NULL;
+	}
+
+	else
+	{
+
+		for (int i = counter; node->topics[i] != NULL; i++)
+		{
+			strcpy(node->topics[i - 1], node->topics[i]);
+			counter = i;
+		}
+
+		node->topics[counter] = NULL;
+	}
 }
 
 int deleteByKey(int key) {

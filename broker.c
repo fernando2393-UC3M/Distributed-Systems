@@ -10,6 +10,10 @@
 #include "sll.c"
 #include "constants.h"
 
+/* List of topics */
+
+char * topiclist [TOPIC_SIZE];
+
 /* Thread variables */
 
 pthread_mutex_t mutex;
@@ -26,6 +30,7 @@ void *manage_request (int* s) {
 	int s_local;
 	int position = 0;
 	int aux = 0;
+	int client_socket = 0;
 	char buffer[sizeof(OPERATION_PUBLISH)+TOPIC_SIZE+TEXT_SIZE];
 	char operation[sizeof(OPERATION_PUBLISH)];
 	char topic[TOPIC_SIZE];
@@ -49,6 +54,8 @@ void *manage_request (int* s) {
 		operation[i] = buffer[i];
 		position++;
 	}
+
+	/* Case PUBLISH */
 
 	if(!strcmp(operation, OPERATION_PUBLISH)){
 
@@ -76,13 +83,13 @@ void *manage_request (int* s) {
 		int check = FALSE;
 		int counter = 0;
 
-		for (int i = 0; topiclist[i] != NULL; i++)
-		{ // If it is in list, confirm
-			if (!strcmp(topic, topiclist[i]))
-			{
+		while(topiclist[counter]!=NULL){
+			if (!strcmp(topic, topiclist[counter]))
+			{	
 				check = TRUE; // Set to true the checker
+				break;
 			}
-			counter++; // Count the number of elements in list
+			counter++;
 		}
 
 		if (check == FALSE)
@@ -97,8 +104,128 @@ void *manage_request (int* s) {
 
 		for(Node * dummy = head; dummy != NULL; dummy = dummy->next) {
 			if(isSubscribed(dummy, topic) == 0){
+				send(dummy->key, topic, sizeof(topic), 0); // Send topic to all subscribed
 				send(dummy->key, text, sizeof(text), 0); // Send topic text to all subscribed
 			}
+		}
+	}
+
+	/* Case SUBSCRIBE */
+
+	else if(!strcmp(operation, OPERATION_SUBSCRIBE)){
+
+		position++;
+
+		char * socket_buffer = NULL;
+
+		for (int i = position; buffer[i] != '\0'; i++)
+		{ // Advance until end socket
+			aux++;
+		}
+
+		socket_buffer = malloc(aux); // malloc with the number of components of socket
+
+		aux = 0;
+
+		for (int i = position; buffer[i] != '\0'; i++)
+		{ // Advance until end socket
+			socket_buffer[aux] = buffer[i];
+			position++;
+			aux++;
+		}
+
+		aux = 0; // Reset value to zero
+
+		char * ptr;
+		client_socket = strtol(socket_buffer, &ptr, 10); // Socket of the client
+
+		position++;
+
+		for (int i = position; buffer[i] != '\0'; i++) // Extract topic
+		{ // Advance until end topic
+			topic[aux] = buffer[i];
+			aux++;
+			position++;
+		}
+
+		int check = FALSE;
+
+		for (int i = 0; topiclist[i] != NULL; i++) // Check if the topic exists
+		{ 
+			if (!strcmp(topic, topiclist[i]))
+			{
+				check = TRUE; // Set to true the checker
+				break;
+			}
+		}
+
+		if(check==FALSE) // If topic to subscribe does not exist
+		{
+			perror("Broker error: topic does not exist");
+		}
+
+		else if(getNode(client_socket)==NULL && check==TRUE) // Node does not exist but topic does --> Include
+		{ 
+			Node * node = createNewNode(client_socket, topic); // Create new node
+			setNode(node); // Add node to the list
+
+		}
+		else if(getNode(client_socket)!=NULL && check==TRUE){
+
+			Node * node = getNode(client_socket);
+			if(isSubscribed(node, topic)<0)
+			{				
+				addTopic(node, topic);
+			}
+			else {
+				perror("Broker error: subscriber already subscribed to topic");
+			}
+		}
+	}
+
+	/* Case UNSUBSCRIBE */
+
+	else if(!strcmp(operation, OPERATION_UNSUBSCRIBE)){
+
+		position++;
+
+		char * socket_buffer = NULL;
+
+		for (int i = position; buffer[i] != '\0'; i++)
+		{ // Advance until end socket
+			aux++;
+		}
+
+		socket_buffer = malloc(aux); // malloc with the number of components of socket
+
+		aux = 0;
+
+		for (int i = position; buffer[i] != '\0'; i++)
+		{ // Advance until end socket
+			socket_buffer[aux] = buffer[i];
+			position++;
+			aux++;
+		}
+
+		aux = 0; // Reset value to zero
+
+		char * ptr;
+		client_socket = strtol(socket_buffer, &ptr, 10); // Socket of the client
+
+		Node * node = getNode(client_socket);
+
+		position++;
+
+		for (int i = position; buffer[i] != '\0'; i++) // Extract topic
+		{ // Advance until end topic
+			topic[aux] = buffer[i];
+			aux++;
+			position++;
+		}
+
+		if(isSubscribed(node, topic)==0)
+		{
+			removeTopic(node, topic);
 		}
 	}
 
