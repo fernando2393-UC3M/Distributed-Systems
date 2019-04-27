@@ -104,6 +104,7 @@ void *manage_request (int* s) {
 
 		for(Node * dummy = head; dummy != NULL; dummy = dummy->next) {
 			if(isSubscribed(dummy, topic) == 0){
+				send(dummy->key, topic, sizeof(topic), 0); // Send topic to all subscribed
 				send(dummy->key, text, sizeof(text), 0); // Send topic text to all subscribed
 			}
 		}
@@ -117,12 +118,23 @@ void *manage_request (int* s) {
 
 		char * socket_buffer = NULL;
 
-		for (int i = position; buffer[i] != '\0'; i++) // Extract topic
-		{ // Advance until end topic
-			socket_buffer[i] = (char) malloc(sizeof(buffer[i]));
-			socket_buffer[i] = buffer[i];
-			position++;
+		for (int i = position; buffer[i] != '\0'; i++)
+		{ // Advance until end socket
+			aux++;
 		}
+
+		socket_buffer = malloc(aux); // malloc with the number of components of socket
+
+		aux = 0;
+
+		for (int i = position; buffer[i] != '\0'; i++)
+		{ // Advance until end socket
+			socket_buffer[aux] = buffer[i];
+			position++;
+			aux++;
+		}
+
+		aux = 0; // Reset value to zero
 
 		char * ptr;
 		client_socket = strtol(socket_buffer, &ptr, 10); // Socket of the client
@@ -179,12 +191,23 @@ void *manage_request (int* s) {
 
 		char * socket_buffer = NULL;
 
-		for (int i = position; buffer[i] != '\0'; i++) // Extract topic
-		{ // Advance until end topic
-			socket_buffer[i] = (char) malloc(sizeof(buffer[i]));
-			socket_buffer[i] = buffer[i];
-			position++;
+		for (int i = position; buffer[i] != '\0'; i++)
+		{ // Advance until end socket
+			aux++;
 		}
+
+		socket_buffer = malloc(aux); // malloc with the number of components of socket
+
+		aux = 0;
+
+		for (int i = position; buffer[i] != '\0'; i++)
+		{ // Advance until end socket
+			socket_buffer[aux] = buffer[i];
+			position++;
+			aux++;
+		}
+
+		aux = 0; // Reset value to zero
 
 		char * ptr;
 		client_socket = strtol(socket_buffer, &ptr, 10); // Socket of the client

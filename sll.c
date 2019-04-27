@@ -7,7 +7,7 @@
 
 typedef struct Node
 {
-    int key;
+    int key; // Change to sock addr and store, as in client, which will be unique
     char * topics [TOPIC_SIZE];
     struct Node *next; // Next node
 } Node;
