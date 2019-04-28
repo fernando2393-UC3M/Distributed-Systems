@@ -115,11 +115,11 @@ void *manage_request (int* s) {
 
 				connect(sd, (struct sockaddr *) &server_addr, sizeof(server_addr));
 				
-				if (send(sd, topic, sizeof(topic), 0) == -1) {
+				if (send(sd, topic+'\n', sizeof(topic+1), 0) == -1) {
 					perror("Error sending topic");
 				}
 
-				if (send(sd, text, sizeof(text), 0) == -1) {
+				if (send(sd, text+'\n', sizeof(text+1), 0) == -1) {
 					perror("Error sending text");
 				}
 			}
