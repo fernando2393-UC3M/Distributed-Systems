@@ -150,7 +150,7 @@ int main(int argc, char *argv[]) {
 		return -1;
 	}
 
-	printf("All messages have been sent\n");
+	close(sd); // Close socket connection
 
 	return 0;
 }

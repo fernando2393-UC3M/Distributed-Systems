@@ -1,26 +1,36 @@
-/* Server class */
-import java.net.ServerSocket;
-import java.net.Socket;
 
-public class ServerThread extends Thread implements Runnable{
+/* Server class */
+import java.net.Socket;
+import java.io.*;
+
+public class ServerThread extends Thread implements Runnable {
 
     private Socket sc;
-    private ServerSocket serverAddr;
 
-    public ServerThread(Socket socket, ServerSocket serversocket){
+    public ServerThread(Socket socket) {
         sc = socket;
-        serverAddr = serversocket;
     }
 
-	public void run(){
-		while(!suscriptor.exit){
+    public void run() {
+        while (!suscriptor.exit) {
+
             try {
-                sc = serverAddr.accept();
-                new ManageRequest(sc).start();
-            }
-            catch(Exception e){
-                System.err.println("Exception " + e.toString());
+
+                BufferedReader tp = new BufferedReader(new InputStreamReader(sc.getInputStream()));
+                // saving
+                String topicrec = tp.readLine();
+                // Processing requests
+                BufferedReader tx = new BufferedReader(new InputStreamReader(sc.getInputStream()));
+                // saving
+                String textrec = tx.readLine();
+
+                System.out.println("c> MESSAGE FROM " + topicrec + " : " + textrec);
+
+                sc.close(); // Message read --> Close socket connection
+                
+            } catch (Exception e) {
+                System.err.println("c> NETWORK ERROR");
             }
         }
-	}
+    }
 }

@@ -8,7 +8,7 @@
 
 typedef struct Node
 {   
-    struct in_addr* ip_address; // IP address of subscriptor
+    char * ip_address; // IP address of subscriptor
     int port; // Port of the subscriptor
     char * topics [TOPIC_SIZE];
     struct Node *next; // Next node
@@ -34,11 +34,14 @@ int removeList()
     return 0;
 }
 
-Node * createNewNode(int port, char *topic){
+Node * createNewNode(int port, char * ip_address, char *topic){
 
     Node* newNode = (Node*)malloc(sizeof(Node));
 
     newNode->port = port;
+
+    newNode->ip_address = malloc(sizeof(ip_address));
+    strcpy(newNode->ip_address, ip_address);
 
     newNode->topics[0] = malloc(TOPIC_SIZE);
     strcpy(newNode->topics[0], topic);
@@ -72,7 +75,7 @@ int setNode(Node * node)
     return 0;
 }
 
-Node *getNode(int port)
+Node *getNode(int port, char * ip_address)
 {
 
     Node *dummy = head;
@@ -83,7 +86,7 @@ Node *getNode(int port)
 
     while (dummy != NULL)
     {
-        if(dummy->port == port){
+        if(dummy->port == port && !strcmp(dummy->ip_address, ip_address)){
             return dummy;
         }
         dummy = dummy->next;
@@ -136,13 +139,13 @@ void removeTopic(Node *node, char *topic)
 	}
 }
 
-int deleteByKey(int port) {
+int deleteByKey(int port, char * ip_address) {
 
     Node* dummy = head;
 
     /* First check of head */
 
-    if(dummy->port == port){
+    if(dummy->port == port && !strcmp(dummy->ip_address, ip_address)){
                 head = dummy->next;
                 free(dummy);
                 return 0;

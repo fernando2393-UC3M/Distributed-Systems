@@ -9,20 +9,55 @@ class suscriptor{
 	/******************* ATTRIBUTES *******************/
 
 	private static String _server = null;
-	private static short _port = -1;
-	private static int _serverport = -1;
-	private static String topic = null;
+	private static int _port = -1;
 
 	public static boolean exit = false;
+
+	private static int serverport = -1;
+	private static InetAddress serveraddress = null;
 
 	static int listenport = -1;
 
 	/********************* METHODS ********************/
 
+	static void createServer(){
+		/* Server creation for listening to new messages from subscribed topics */
+
+		ServerSocket serverAddr = null;
+		Socket sock = null;
+
+		try {
+			serverAddr = new ServerSocket(0); // Random free port
+		} catch (Exception e) {
+			System.err.println("c> NETWORK ERROR");
+		}
+
+		serverport = serverAddr.getLocalPort(); // Get port from server for posterior messages
+		serveraddress = serverAddr.getInetAddress(); // Get address from server for posterior messages
+
+		/* Initialize server socket for listening to broker */
+
+		try {
+
+			sock = serverAddr.accept();
+			new ServerThread(sock).start();
+		}
+		catch (Exception e) {
+			System.err.println("c> NETWORK ERROR");
+		}
+	}
+
 	static int subscribe(String topic) {
 		// Write your code here
 
-		System.out.println("Subscribe to: " + topic);
+		if (topic.length() > 128) {
+
+			System.err.println("c> Topic has more than 128 characters");
+
+			return -1;
+
+		}
+
 		// Connection
 		String host = _server;
 
@@ -30,10 +65,10 @@ class suscriptor{
 
 			Socket sc = new Socket(host, _port);
 
-			/* Sending message */
-
-			// reply
 			DataOutputStream os = new DataOutputStream(sc.getOutputStream());
+			BufferedReader istream = new BufferedReader(new InputStreamReader(sc.getInputStream()));
+
+     /* Sending message */
 
 			os.writeBytes("SUBSCRIBE" + "\0");
 			os.flush();
@@ -41,73 +76,30 @@ class suscriptor{
 			os.writeBytes(topic + "\0");
 			os.flush();
 
-			/* Receiving message */
+			/* Send to the broker both address and port where communications must be received */
 
-			BufferedReader istream = new BufferedReader(new InputStreamReader(sc.getInputStream()));
+			os.writeBytes(serveraddress.toString() + "\0");
+			os.flush();
+
+			os.writeBytes(serverport + "\0");
+			os.flush();
+
+			/* Receiving message */
 
 			String res = istream.readLine();
 
-			System.out.println("RES IS: " + res);
+			if (res.equals("1\0")) {
 
-			sc.close();
-
-			if (res.equals("-1\0")) {
 				System.out.println("c> SUBSCRIBE FAIL");
 
-				ServerSocket serverAddr = null;
-				// Socket scs = null;
-				int auxport;
-				InetAddress addr;
-
-				try {
-					serverAddr = new ServerSocket(0);
-				} catch (Exception e) {
-					System.out.println("Error creating server");
-				}
-
-				auxport = serverAddr.getLocalPort();
-				addr = serverAddr.getInetAddress();
-
-				System.out.println("Llego aqui");
-
-				os.writeBytes(addr + "\0");
-				os.flush();
-
-				os.writeBytes(auxport + "\0");
-				os.flush();
-
-				System.out.println("ENVIADO");
-
-				return -1;
 			}
 
-			else {
+			else if(res.equals("0\0")) {
+
 				System.out.println("c> SUBSCRIBE OK");
-				System.out.println("1");
-				// sc = new Socket(host, _port);
-				System.out.println("2");
-				// os = new DataOutputStream(sc.getOutputStream());
-				System.out.println("3");
 
-				// os.writeBytes(listenport + "\0");
-				System.out.println("4");
-				// os.flush();
-				System.out.println("5");
-
-				// sc.close();
-
-				/*
-				 * ServerSocket serverAddr = null; Socket scs = null; int auxport;
-				 * 
-				 * try{ serverAddr = new ServerSocket(0); } catch (Exception e) {
-				 * System.out.println("Error creating server"); }
-				 * 
-				 * auxport = serverAddr.getLocalPort();
-				 * 
-				 * Thread t = new Thread(new suscriptor(topic, _serverport)); //prevent thread
-				 * from exiting when the progamm finishes t.setDaemon(true); t.start();
-				 */
 			}
+
 			sc.close();
 
 		} catch (Exception e) {
@@ -118,62 +110,67 @@ class suscriptor{
 
 	static int unsubscribe(String topic) {
 		// Write your code here
-		System.out.println("Unsubscribe from: " + topic);
+
+		if (topic.length() > 128) {
+
+			System.err.println("c> Topic has more than 128 characters");
+
+			return -1;
+
+		}
+
 		// Connection
 		String host = _server;
+
 		try {
 
 			Socket sc = new Socket(host, _port);
 
+			DataOutputStream os = new DataOutputStream(sc.getOutputStream());
+			BufferedReader istream = new BufferedReader(new InputStreamReader(sc.getInputStream()));
+
 			/* Sending message */
 
-			// choose port to listen if one not already set
-			if (_serverport == -1) {
-				_serverport = sc.getLocalPort(); // this will get a free random port
-			}
-
-			String serport = String.valueOf(_serverport);
-			System.out.println(serport);
-
-			// reply
-			DataOutputStream os = new DataOutputStream(sc.getOutputStream());
-
-			// Send UNSUBSCRIBE to server
 			os.writeBytes("UNSUBSCRIBE" + "\0");
 			os.flush();
 
-			// Send port to server
-			os.writeBytes(serport + "\0");
-			os.flush();
-
-			// Send topic to server
 			os.writeBytes(topic + "\0");
 			os.flush();
 
-			// receive response
-			BufferedReader istream = new BufferedReader(new InputStreamReader(sc.getInputStream()));
+			/* Send to the broker both address and port where communications must be received */
+
+			os.writeBytes(serveraddress.toString() + "\0");
+			os.flush();
+
+			os.writeBytes(serverport + "\0");
+			os.flush();
+
+			/* Receiving message */
 
 			String res = istream.readLine();
 
 			if (res.equals("2\0")) {
+
 				System.out.println("c> UNSUBSCRIBE FAIL");
-				sc.close();
-				return -1;
-				// topic was not subscibed
+
 			}
 
 			else if (res.equals("1\0")) {
+
 				System.out.println("c> TOPIC NOT SUBSCRIBED");
-				sc.close();
-				return -1;
+
 			}
 
 			else if (res.equals("0\0")) {
+
 				System.out.println("c> UNSUBSCRIBE OK");
-				sc.close();
+
 			}
+
+			sc.close();
+
 		} catch (Exception e) {
-			System.err.println("Error in the connection to the broker " + host + _port);
+			System.err.println("Error in the connection to the broker " + host + " : " + _port);
 		}
 		return 0;
 	}
@@ -188,20 +185,9 @@ class suscriptor{
 		String[] line;
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
-		/* Server creation for listening to new messages from subscribed topics */
+		/* Create server to receive messages for each topic */
 
-		ServerSocket serverAddr = null;
-		Socket sock = null;
-
-		try {
-			serverAddr = new ServerSocket(0); // Random free port
-		} catch (Exception e) {
-			System.out.println("Error creating server socket");
-		}
-
-		/* Initialize server socket for listening to broker */
-
-		new ServerThread(sock, serverAddr).start();
+		createServer();
 
 		while (!exit) {
 			try {
@@ -244,7 +230,7 @@ class suscriptor{
 					}
 				}
 			} catch (java.io.IOException e) {
-				System.out.println("Exception: " + e);
+				System.err.println("c> NETWORK ERROR");
 				e.printStackTrace();
 			}
 		}		
@@ -305,20 +291,10 @@ class suscriptor{
 			return;
 		}
 
-		ServerSocket serverAddr = null;
-
-		try{
-			serverAddr = new ServerSocket(0);
-		} 
-		catch (Exception e) {
-			System.out.println("Error creating server");
-		}
-
-		listenport = serverAddr.getLocalPort();
-
 		// Write code here
 
 		shell();
+
 		System.out.println("+++ FINISHED +++");
 	}
 }
