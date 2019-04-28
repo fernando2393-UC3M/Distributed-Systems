@@ -24,7 +24,6 @@ class suscriptor{
 		/* Server creation for listening to new messages from subscribed topics */
 
 		ServerSocket serverAddr = null;
-		Socket sock = null;
 
 		try {
 			serverAddr = new ServerSocket(0); // Random free port
@@ -37,14 +36,8 @@ class suscriptor{
 
 		/* Initialize server socket for listening to broker */
 
-		try {
-
-			sock = serverAddr.accept();
-			new ServerThread(sock).start();
-		}
-		catch (Exception e) {
-			System.err.println("c> NETWORK ERROR");
-		}
+		new ServerThread(serverAddr).start();
+		
 	}
 
 	static int subscribe(String topic) {

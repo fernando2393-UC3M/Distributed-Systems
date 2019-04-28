@@ -1,14 +1,14 @@
 
 /* Server class */
+import java.net.ServerSocket;
 import java.net.Socket;
-import java.io.*;
 
 public class ServerThread extends Thread implements Runnable {
 
-    private Socket sc;
+    private ServerSocket serverAddr;
 
-    public ServerThread(Socket socket) {
-        sc = socket;
+    public ServerThread(ServerSocket server) {
+        serverAddr = server;
     }
 
     public void run() {
@@ -16,20 +16,13 @@ public class ServerThread extends Thread implements Runnable {
 
             try {
 
-                BufferedReader tp = new BufferedReader(new InputStreamReader(sc.getInputStream()));
-                // saving
-                String topicrec = tp.readLine();
-                // Processing requests
-                BufferedReader tx = new BufferedReader(new InputStreamReader(sc.getInputStream()));
-                // saving
-                String textrec = tx.readLine();
+                Socket sc = serverAddr.accept();
 
-                System.out.println("c> MESSAGE FROM " + topicrec + " : " + textrec);
-
-                sc.close(); // Message read --> Close socket connection
+                new ManageRequest(sc).start();
                 
             } catch (Exception e) {
                 System.err.println("c> NETWORK ERROR");
+                break;
             }
         }
     }

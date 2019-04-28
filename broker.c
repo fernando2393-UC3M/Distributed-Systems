@@ -145,7 +145,6 @@ void *manage_request (int* s) {
 		{ 
 			if (!strcmp(topic, topiclist[i]))
 			{	
-				printf("INCLUDED\n");
 				check = TRUE; // Set to true the checker
 				break;
 			}
