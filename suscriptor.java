@@ -14,7 +14,9 @@ class suscriptor implements Runnable{
 	private static short _port = -1;
 	private static int _serverport = -1;
 	private static String topic = null;
-	private static String unsub = null;
+
+	static int listenport = -1;
+
 
 	/********************* METHODS ********************/
 	//thread methods
@@ -24,10 +26,10 @@ class suscriptor implements Runnable{
 	  }
 	public void run() throws RuntimeException {
 		try {
+			
 			ServerSocket sc = new ServerSocket(_serverport);
 
-			// infinite loop that will stop when user unsubscribes a topic
-			while (!unsub.equals(topic)) { //boolean
+			while (true) { //boolean
 				// Waiting for requests
 				Socket serversock = sc.accept();
 				// Processing requests
@@ -59,44 +61,95 @@ class suscriptor implements Runnable{
 		System.out.println("Subscribe to: " + topic);
 		// Connection
 		String host = _server;
+
 		try {
+			
 			Socket sc = new Socket(host, _port);
-			PrintWriter o = null;
-			o = new PrintWriter(new OutputStreamWriter(sc.getOutputStream()));
 
-			// choose port to listen if one not already set
-			if(_serverport == -1){
-				ServerSocket s = new ServerSocket(0); // Using 0 this will get a free random port
-				_serverport = s.getLocalPort(); // or getPort()
-			}
-
-			String serport = String.valueOf(_serverport);
+			/* Sending message */
+			
 			// reply
 			DataOutputStream os = new DataOutputStream(sc.getOutputStream());
 
 			os.writeBytes("SUBSCRIBE" + "\0");
 			os.flush();
 
-			os.writeBytes(serport + "\0");
-			os.flush();
-
 			os.writeBytes(topic + "\0");
 			os.flush();
 
+			/* Receiving message */
 
+			BufferedReader istream = new BufferedReader(new InputStreamReader(sc.getInputStream()));
 
-			BufferedReader in = null;
-			String res = in.readLine();
-			unsub = null;
-			if (res.equals("-1")) {
+			String res = istream.readLine();
+
+			System.out.println("RES IS: "+res);
+
+			sc.close();
+
+			if (res.equals("-1\0")) {
 				System.out.println("c> SUBSCRIBE FAIL");
+
+				ServerSocket serverAddr = null;
+				//Socket scs = null;
+				int auxport;
+				InetAddress addr;
+
+				try{
+					serverAddr = new ServerSocket(0);
+				} 
+				catch (Exception e) {
+					System.out.println("Error creating server");
+				}
+
+				auxport = serverAddr.getLocalPort();
+				addr = serverAddr.getInetAddress();
+
+				System.out.println("Llego aqui");
+
+				os.writeBytes(addr + "\0");
+				os.flush();
+
+				os.writeBytes(auxport + "\0");
+				os.flush();
+
+				System.out.println("ENVIADO");
+
 				return -1;
-			} else {
+			} 
+			
+			else {
 				System.out.println("c> SUBSCRIBE OK");
+				System.out.println("1");
+				//sc = new Socket(host, _port);
+				System.out.println("2");
+				//os = new DataOutputStream(sc.getOutputStream());
+				System.out.println("3");
+
+				//os.writeBytes(listenport + "\0");
+				System.out.println("4");
+				//os.flush();
+				System.out.println("5");
+
+				//sc.close();
+
+				/*ServerSocket serverAddr = null;
+				Socket scs = null;
+				int auxport;
+
+				try{
+					serverAddr = new ServerSocket(0);
+				} 
+				catch (Exception e) {
+					System.out.println("Error creating server");
+				}
+
+				auxport = serverAddr.getLocalPort();
+
 				Thread t = new Thread(new suscriptor(topic, _serverport));
 				//prevent thread from exiting when the progamm finishes
 				t.setDaemon(true);
-				t.start();
+				t.start();*/
 			}
 			sc.close();
 
@@ -112,16 +165,20 @@ class suscriptor implements Runnable{
 		// Connection
 		String host = _server;
 		try {
+
 			Socket sc = new Socket(host, _port);
+
+			/* Sending message */
 
 			// choose port to listen if one not already set
 			if(_serverport == -1){
-				ServerSocket s = new ServerSocket(0); // Using 0 this will get a free random port
-				_serverport = s.getLocalPort(); // or getPort()
+				_serverport = sc.getLocalPort(); // this will get a free random port
 			}
 
 			String serport = String.valueOf(_serverport);
-
+			System.out.println(serport);
+			
+			// reply
 			DataOutputStream os = new DataOutputStream(sc.getOutputStream());
 
 			// Send UNSUBSCRIBE to server
@@ -137,23 +194,26 @@ class suscriptor implements Runnable{
 			os.flush();
 
 			// receive response
-			DataInputStream istream = new DataInputStream(sc.getInputStream());
-			BufferedReader r = new BufferedReader(new InputStreamReader(istream));
-			String res = r.readLine();
+			BufferedReader istream = new BufferedReader(new InputStreamReader(sc.getInputStream()));
 
-			if (res.equals("2")) {
+			String res = istream.readLine();
+
+			if (res.equals("2\0")) {
 				System.out.println("c> UNSUBSCRIBE FAIL");
 				sc.close();
 				return -1;
 				// topic was not subscibed
-			} else if (res.equals("1")) {
+			} 
+			
+			else if (res.equals("1\0")) {
 				System.out.println("c> TOPIC NOT SUBSCRIBED");
 				sc.close();
 				return -1;
-			} else if (res.equals("0")){
+			} 
+			
+			else if (res.equals("0\0")){
 				System.out.println("c> UNSUBSCRIBE OK");
 				sc.close();
-				unsub = topic;
 			}
 		} catch (Exception e) {
 			System.err.println("Error in the connection to the broker " + host + _port);
@@ -271,6 +331,17 @@ class suscriptor implements Runnable{
 			usage();
 			return;
 		}
+
+		ServerSocket serverAddr = null;
+
+		try{
+			serverAddr = new ServerSocket(0);
+		} 
+		catch (Exception e) {
+			System.out.println("Error creating server");
+		}
+
+		listenport = serverAddr.getLocalPort();
 
 		// Write code here
 

@@ -7,8 +7,9 @@
 /* SSL Definition */
 
 typedef struct Node
-{
-    struct sockaddr_in key; // Change to sock addr and store, as in client, which will be unique
+{   
+    struct in_addr* ip_address; // IP address of subscriptor
+    int port; // Port of the subscriptor
     char * topics [TOPIC_SIZE];
     struct Node *next; // Next node
 } Node;
@@ -33,11 +34,11 @@ int removeList()
     return 0;
 }
 
-Node * createNewNode(struct sockaddr_in key, char *topic){
+Node * createNewNode(int port, char *topic){
 
     Node* newNode = (Node*)malloc(sizeof(Node));
 
-    newNode->key = key;
+    newNode->port = port;
 
     newNode->topics[0] = malloc(TOPIC_SIZE);
     strcpy(newNode->topics[0], topic);
@@ -71,7 +72,7 @@ int setNode(Node * node)
     return 0;
 }
 
-Node *getNode(struct sockaddr_in key)
+Node *getNode(int port)
 {
 
     Node *dummy = head;
@@ -82,7 +83,7 @@ Node *getNode(struct sockaddr_in key)
 
     while (dummy != NULL)
     {
-        if((dummy->key.sin_port == key.sin_port) && (dummy->key.sin_addr.s_addr == key.sin_addr.s_addr)){ // If port is the same and address is also the same
+        if(dummy->port == port){
             return dummy;
         }
         dummy = dummy->next;
@@ -135,13 +136,13 @@ void removeTopic(Node *node, char *topic)
 	}
 }
 
-int deleteByKey(struct sockaddr_in key) {
+int deleteByKey(int port) {
 
     Node* dummy = head;
 
     /* First check of head */
 
-    if((dummy->key.sin_port == key.sin_port) && (dummy->key.sin_addr.s_addr == key.sin_addr.s_addr)){ // If port is the same and address is also the same
+    if(dummy->port == port){
                 head = dummy->next;
                 free(dummy);
                 return 0;
@@ -154,7 +155,7 @@ int deleteByKey(struct sockaddr_in key) {
     dummy = dummy->next;
 
     while(dummy != NULL) {
-        if((dummy->key.sin_port == key.sin_port) && (dummy->key.sin_addr.s_addr == key.sin_addr.s_addr)){ // If port is the same and address is also the same
+        if(dummy->port == port){
 
             prev_dummy->next = dummy->next;
 

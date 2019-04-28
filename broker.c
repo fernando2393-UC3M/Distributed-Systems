@@ -10,6 +10,8 @@
 #include "sll.c"
 #include "constants.h"
 #include "lines.h"
+#include <netdb.h>
+#include <arpa/inet.h>
 
 /* List of topics */
 
@@ -28,7 +30,6 @@ void print_usage()
 
 void *manage_request (int* s) {
 
-	int s_local;
 	int client_socket = 0;
 	char buffer[TEXT_SIZE];
 	char * operation = NULL;
@@ -36,7 +37,6 @@ void *manage_request (int* s) {
 	char * text = NULL;
 
 	pthread_mutex_lock(&mutex);
-	s_local = *s;
 	busy = FALSE;
 	pthread_cond_signal(&condition);
 	pthread_mutex_unlock(&mutex);
@@ -51,8 +51,6 @@ void *manage_request (int* s) {
 
 	operation = malloc(strlen(buffer));
 	strcpy(operation, buffer);
-
-	printf("%s\n", operation);
 
 	/* Case PUBLISH */
 
@@ -84,6 +82,7 @@ void *manage_request (int* s) {
 		while(topiclist[counter]!=NULL){
 			if (!strcmp(topic, topiclist[counter]))
 			{	
+				printf("ALREADY EXISTS\n");
 				check = TRUE; // Set to true the checker
 				break;
 			}
@@ -92,6 +91,7 @@ void *manage_request (int* s) {
 
 		if (check == FALSE)
 		{ // If it is not in the list, include
+			printf("NOT EXISTS --> INCLUDE\n");
 			topiclist[counter] = malloc(sizeof(topic));
 			strcpy(topiclist[counter], topic);
 		}
@@ -112,21 +112,6 @@ void *manage_request (int* s) {
 
 	else if(!strcmp(operation, OPERATION_SUBSCRIBE)){
 
-		char * socket_buffer = NULL;
-
-		/* Read sent port */
-
-		if(readLine(*s, buffer, sizeof(buffer)) < 0){
-			perror("Broker error: error reading message");
-		}
-
-		socket_buffer = malloc(strlen(buffer));
-		strcpy(socket_buffer, buffer);
-
-		char * ptr;
-		client_socket = strtol(socket_buffer, &ptr, 10); // Socket of the client
-		printf("Client port: %d\n", client_socket);
-
 		/* Read topic */
 
 		if(readLine(*s, buffer, sizeof(buffer)) < 0){
@@ -141,17 +126,40 @@ void *manage_request (int* s) {
 		for (int i = 0; topiclist[i] != NULL; i++) // Check if the topic exists
 		{ 
 			if (!strcmp(topic, topiclist[i]))
-			{
+			{	
+				printf("INCLUDED\n");
 				check = TRUE; // Set to true the checker
 				break;
 			}
 		}
 
+		/* Create connection to reply */
+
 		if(check==FALSE) // If topic to subscribe does not exist
-		{	
-			char * ans = "-1";
-			perror("Broker error: topic does not exist");
-			send(client_socket, ans, sizeof(ans), 0);
+		{
+			printf("NOT INCLUDED\n");
+			bzero(buffer, sizeof(buffer)); // Reset buffer content
+
+			send(*s, "-1", sizeof("-1"), 0);
+			
+			readLine(*s, buffer, sizeof(buffer));
+			char * content = malloc(sizeof(buffer));
+			strcpy(content, buffer);
+
+			printf("%s\n", content);
+			
+		}
+
+		else {
+			bzero(buffer, sizeof(buffer)); // Reset buffer content
+			printf("Buffer reset\n");
+			send(*s, "0", sizeof("0"), 0);
+			printf("0 Sent\n");
+			readLine(*s, buffer, sizeof(buffer));
+			char * content = malloc(sizeof(buffer));
+			strcpy(content, buffer);
+
+			printf("PORT: %s\n", content);
 		}
 
 		/*else if(getNode(client_socket)==NULL && check==TRUE) // Node does not exist but topic does --> Include
@@ -209,7 +217,7 @@ void *manage_request (int* s) {
 
 	/* End of request management */
 
-	close(s_local);
+	close(*s);
 	pthread_exit(NULL);
 
 }
