@@ -30,7 +30,6 @@ void print_usage()
 
 void *manage_request (int* s) {
 
-	int client_socket = 0;
 	char buffer[TEXT_SIZE];
 	char * operation = NULL;
 	char * topic = NULL;
