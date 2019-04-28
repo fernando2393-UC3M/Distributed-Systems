@@ -21,7 +21,7 @@ public class ServerThread extends Thread implements Runnable {
                 new ManageRequest(sc).start();
                 
             } catch (Exception e) {
-                System.err.println("c> NETWORK ERROR");
+                System.err.println(" NETWORK ERROR");
                 break;
             }
         }

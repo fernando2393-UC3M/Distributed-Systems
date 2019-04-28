@@ -106,7 +106,7 @@ void *manage_request (int* s) {
 				struct hostent * hp;
 
 				bzero((char *)&server_addr, sizeof(server_addr));
-				hp = gethostbyname(dummy->ip_address);
+				hp = gethostbyname("127.0.0.1"); // It is necessary to parse the IP --> now it is 0.0.0.0/0.0.0.0
 
 				memcpy(&(server_addr.sin_addr), hp->h_addr, hp->h_length);
 
@@ -217,7 +217,6 @@ void *manage_request (int* s) {
 		{ 
 			if (!strcmp(topic, topiclist[i]))
 			{	
-				printf("INCLUDED\n");
 				check = TRUE; // Set to true the checker
 				break;
 			}
