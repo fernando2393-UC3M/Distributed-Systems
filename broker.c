@@ -123,9 +123,6 @@ void *manage_request (int* s) {
 				if (send(sd, text, sizeof(text), 0) == -1) {
 					perror("Error sending text");
 				}
-
-				close(sd);
-
 			}
 		}
 	}
