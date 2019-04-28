@@ -1,10 +1,8 @@
 import java.io.*;
-import java.lang.*;
 import java.net.*;
-import java.util.*;
 import gnu.getopt.Getopt;
 
-class suscriptor implements Runnable{
+class suscriptor{
 
 	/********************* TYPES **********************/
 
@@ -15,45 +13,11 @@ class suscriptor implements Runnable{
 	private static int _serverport = -1;
 	private static String topic = null;
 
+	public static boolean exit = false;
+
 	static int listenport = -1;
 
-
 	/********************* METHODS ********************/
-	//thread methods
-	public suscriptor (String topic, int _serverport) {
-	    this.topic = topic;
-	    this._serverport = _serverport;
-	  }
-	public void run() throws RuntimeException {
-		try {
-			
-			ServerSocket sc = new ServerSocket(_serverport);
-
-			while (true) { //boolean
-				// Waiting for requests
-				Socket serversock = sc.accept();
-				// Processing requests
-				BufferedReader tp = new BufferedReader(new InputStreamReader(serversock.getInputStream()));
-				// saving
-				String topicrec = tp.readLine();
-				// Processing requests
-				BufferedReader tx = new BufferedReader(new InputStreamReader(serversock.getInputStream()));
-				// saving
-				String textrec = tx.readLine();
-
-
-				System.out.println("c> MESSAGE FROM " + topicrec + " : " + textrec);
-
-				sc.close();
-				serversock.close();
-			}
-
-		} catch (RuntimeException e) {
-			System.err.println("c> NETWORK ERROR" + e.toString());
-		} catch(IOException e) {
-			System.err.println("Error in the connection to the broker " + _server + _serverport + e.toString());
-		}
-	}
 
 	static int subscribe(String topic) {
 		// Write your code here
@@ -63,11 +27,11 @@ class suscriptor implements Runnable{
 		String host = _server;
 
 		try {
-			
+
 			Socket sc = new Socket(host, _port);
 
 			/* Sending message */
-			
+
 			// reply
 			DataOutputStream os = new DataOutputStream(sc.getOutputStream());
 
@@ -83,7 +47,7 @@ class suscriptor implements Runnable{
 
 			String res = istream.readLine();
 
-			System.out.println("RES IS: "+res);
+			System.out.println("RES IS: " + res);
 
 			sc.close();
 
@@ -91,14 +55,13 @@ class suscriptor implements Runnable{
 				System.out.println("c> SUBSCRIBE FAIL");
 
 				ServerSocket serverAddr = null;
-				//Socket scs = null;
+				// Socket scs = null;
 				int auxport;
 				InetAddress addr;
 
-				try{
+				try {
 					serverAddr = new ServerSocket(0);
-				} 
-				catch (Exception e) {
+				} catch (Exception e) {
 					System.out.println("Error creating server");
 				}
 
@@ -116,40 +79,34 @@ class suscriptor implements Runnable{
 				System.out.println("ENVIADO");
 
 				return -1;
-			} 
-			
+			}
+
 			else {
 				System.out.println("c> SUBSCRIBE OK");
 				System.out.println("1");
-				//sc = new Socket(host, _port);
+				// sc = new Socket(host, _port);
 				System.out.println("2");
-				//os = new DataOutputStream(sc.getOutputStream());
+				// os = new DataOutputStream(sc.getOutputStream());
 				System.out.println("3");
 
-				//os.writeBytes(listenport + "\0");
+				// os.writeBytes(listenport + "\0");
 				System.out.println("4");
-				//os.flush();
+				// os.flush();
 				System.out.println("5");
 
-				//sc.close();
+				// sc.close();
 
-				/*ServerSocket serverAddr = null;
-				Socket scs = null;
-				int auxport;
-
-				try{
-					serverAddr = new ServerSocket(0);
-				} 
-				catch (Exception e) {
-					System.out.println("Error creating server");
-				}
-
-				auxport = serverAddr.getLocalPort();
-
-				Thread t = new Thread(new suscriptor(topic, _serverport));
-				//prevent thread from exiting when the progamm finishes
-				t.setDaemon(true);
-				t.start();*/
+				/*
+				 * ServerSocket serverAddr = null; Socket scs = null; int auxport;
+				 * 
+				 * try{ serverAddr = new ServerSocket(0); } catch (Exception e) {
+				 * System.out.println("Error creating server"); }
+				 * 
+				 * auxport = serverAddr.getLocalPort();
+				 * 
+				 * Thread t = new Thread(new suscriptor(topic, _serverport)); //prevent thread
+				 * from exiting when the progamm finishes t.setDaemon(true); t.start();
+				 */
 			}
 			sc.close();
 
@@ -171,13 +128,13 @@ class suscriptor implements Runnable{
 			/* Sending message */
 
 			// choose port to listen if one not already set
-			if(_serverport == -1){
+			if (_serverport == -1) {
 				_serverport = sc.getLocalPort(); // this will get a free random port
 			}
 
 			String serport = String.valueOf(_serverport);
 			System.out.println(serport);
-			
+
 			// reply
 			DataOutputStream os = new DataOutputStream(sc.getOutputStream());
 
@@ -203,15 +160,15 @@ class suscriptor implements Runnable{
 				sc.close();
 				return -1;
 				// topic was not subscibed
-			} 
-			
+			}
+
 			else if (res.equals("1\0")) {
 				System.out.println("c> TOPIC NOT SUBSCRIBED");
 				sc.close();
 				return -1;
-			} 
-			
-			else if (res.equals("0\0")){
+			}
+
+			else if (res.equals("0\0")) {
 				System.out.println("c> UNSUBSCRIBE OK");
 				sc.close();
 			}
@@ -226,13 +183,29 @@ class suscriptor implements Runnable{
 	 *        functions.
 	 */
 	static void shell() {
-		boolean exit = false;
+
 		String input;
 		String[] line;
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
+		/* Server creation for listening to new messages from subscribed topics */
+
+		ServerSocket serverAddr = null;
+		Socket sock = null;
+
+		try {
+			serverAddr = new ServerSocket(0); // Random free port
+		} catch (Exception e) {
+			System.out.println("Error creating server socket");
+		}
+
+		/* Initialize server socket for listening to broker */
+
+		new ServerThread(sock, serverAddr).start();
+
 		while (!exit) {
 			try {
+
 				System.out.print("c> ");
 				input = in.readLine();
 				line = input.split("\\s");
@@ -261,7 +234,7 @@ class suscriptor implements Runnable{
 						if (line.length == 1) {
 							exit = true;
 						} else {
-							System.out.println("Syntax error. Use: QUIT");
+							System.out.println("Syntax error. Usage: QUIT");
 						}
 					}
 
@@ -274,7 +247,7 @@ class suscriptor implements Runnable{
 				System.out.println("Exception: " + e);
 				e.printStackTrace();
 			}
-		}
+		}		
 	}
 
 	/**

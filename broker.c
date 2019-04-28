@@ -303,6 +303,7 @@ int main(int argc, char *argv[])
 			perror("Broker error: Request could not be accepted");
 			return -1;
 		}
+		
 		pthread_create(&thid, &attr, (void*) &manage_request, &sc);
 
 		/* Waiting for thread to manage the request */
