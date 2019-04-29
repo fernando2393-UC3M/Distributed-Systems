@@ -16,14 +16,14 @@ class suscriptor{
 	private static int serverport = -1;
 	private static InetAddress serveraddress = null;
 
+	private static ServerSocket serverAddr = null;
+
 	static int listenport = -1;
 
 	/********************* METHODS ********************/
 
 	static void createServer(){
 		/* Server creation for listening to new messages from subscribed topics */
-
-		ServerSocket serverAddr = null;
 
 		try {
 			serverAddr = new ServerSocket(0); // Random free port
@@ -211,6 +211,7 @@ class suscriptor{
 					/************** QUIT **************/
 					else if (line[0].equals("QUIT")) {
 						if (line.length == 1) {
+							serverAddr.close();
 							exit = true;
 						} else {
 							System.out.println("Syntax error. Usage: QUIT");
@@ -287,7 +288,5 @@ class suscriptor{
 		// Write code here
 
 		shell();
-
-		System.out.println("+++ FINISHED +++");
 	}
 }
