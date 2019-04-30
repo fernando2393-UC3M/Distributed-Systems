@@ -113,18 +113,44 @@ void *manage_request (int* s, char * address) {
 				server_addr.sin_family = AF_INET;
 				server_addr.sin_port = htons(dummy->port);				
 
-				connect(sd, (struct sockaddr *) &server_addr, sizeof(server_addr));
+				if ((connect(sd, (struct sockaddr *) &server_addr, sizeof(server_addr))) < 0){
+					fprintf(stderr, "Error in the connection to the subscriber %s : %d\n", dummy->ip_address, dummy->port);
+
+					/* If error connecting to subscriber --> subscriber gone --> Delete from list */
+					
+					deleteByKey(dummy->port, dummy->ip_address);
+
+					/* Close connection and go to next node */
+
+					close(sd);
+					continue;
+				}
 				
 				if (send(sd, topic, strlen(topic), 0) == -1) {
 					perror("Error sending topic");
+					
+					/* Close connection and go to next node */
+
+					close(sd);
+					continue;
 				}
 
 				if (send(sd, "\n", sizeof("\n"), 0) == -1) { // Send \n to split message in java client
 					perror("Error sending text");
+					
+					/* Close connection and go to next node */
+
+					close(sd);
+					continue;
 				}
 
 				if (send(sd, text, strlen(text), 0) == -1) {
 					perror("Error sending text");
+					
+					/* Close connection and go to next node */
+
+					close(sd);
+					continue;
 				}
 
 				close(sd);

@@ -89,7 +89,7 @@ int main(int argc, char *argv[]) {
 
 	if (connect(sd, (struct sockaddr *)&server_address, sizeof(server_address)) < 0)
 	{
-		fprintf(stderr, "Error in the connection to the server %s:%s\n", host, port);
+		fprintf(stderr, "Error in the connection to the server %s : %s\n", host, port);
 		return -1;
 	}
 	else
