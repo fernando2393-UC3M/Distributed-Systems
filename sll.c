@@ -99,10 +99,10 @@ void addTopic(Node *node, char *topic)
 {
     int counter = 0;
 
-    for(int i = 0; node->topics[i]!=NULL; i++){
-        counter++;        
+    for (int i = 0; node->topics[i] != NULL; i++)
+    {
+        counter++;
     }
-    counter++;
     node->topics[counter] = malloc(TOPIC_SIZE);
     strcpy(node->topics[counter], topic);
 }

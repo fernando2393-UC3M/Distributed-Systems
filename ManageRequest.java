@@ -15,16 +15,16 @@ public class ManageRequest extends Thread implements Runnable {
         try {
             BufferedReader br = new BufferedReader(new InputStreamReader(sc.getInputStream()));
             
-            String topicrec = br.readLine();
-            
-            String textrec = br.readLine();
+            String topic = br.readLine();
 
-            System.out.print(" MESSAGE FROM " + topicrec + " : " + textrec);
+            String text = br.readLine();
+
+            System.out.print("MESSAGE FROM " + topic + " : " + text);
 
             sc.close(); // Message read --> Close socket connection
         } 
         catch (Exception e) {
-            System.err.println(" NETWORK ERROR");
+            System.err.print("NETWORK ERROR");
         }
     }
 }

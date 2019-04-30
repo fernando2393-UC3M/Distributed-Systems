@@ -28,7 +28,7 @@ void print_usage()
 	printf("Usage: broker -p port \n");
 }
 
-void *manage_request (int* s) {
+void *manage_request (int* s, char * address) {
 
 	char buffer[TEXT_SIZE];
 	char * operation = NULL;
@@ -106,22 +106,29 @@ void *manage_request (int* s) {
 				struct hostent * hp;
 
 				bzero((char *)&server_addr, sizeof(server_addr));
-				hp = gethostbyname("127.0.0.1"); // It is necessary to parse the IP --> now it is 0.0.0.0/0.0.0.0
+				hp = gethostbyname(dummy->ip_address);
 
 				memcpy(&(server_addr.sin_addr), hp->h_addr, hp->h_length);
 
 				server_addr.sin_family = AF_INET;
-				server_addr.sin_port = htons(dummy->port);
+				server_addr.sin_port = htons(dummy->port);				
 
 				connect(sd, (struct sockaddr *) &server_addr, sizeof(server_addr));
 				
-				if (send(sd, topic, sizeof(topic), 0) == -1) {
+				if (send(sd, topic, strlen(topic), 0) == -1) {
 					perror("Error sending topic");
 				}
 
-				if (send(sd, text, sizeof(text), 0) == -1) {
+				if (send(sd, "\n", sizeof("\n"), 0) == -1) { // Send \n to split message in java client
 					perror("Error sending text");
 				}
+
+				if (send(sd, text, strlen(text), 0) == -1) {
+					perror("Error sending text");
+				}
+
+				close(sd);
+
 			}
 		}
 	}
@@ -150,9 +157,19 @@ void *manage_request (int* s) {
 			}
 		}
 
-		if(check==FALSE) // If topic to subscribe does not exist
+		if(check == FALSE) // If topic to subscribe does not exist
 		{
 
+			/* Read port to free buffer */
+
+			if (readLine(*s, buffer, sizeof(buffer)) < 0)
+			{
+				perror("Broker error: error reading message");
+			}
+
+			char *string_port = malloc(strlen(buffer));
+			strcpy(string_port, buffer);
+			
 			send(*s, "1", sizeof("1"), 0);
 			
 		}
@@ -160,15 +177,15 @@ void *manage_request (int* s) {
 		else
 		{
 
-			/* Read address */
+			/* Get address */
 
-			if (readLine(*s, buffer, sizeof(buffer)) < 0)
-			{
-				perror("Broker error: error reading message");
-			}
+			struct sockaddr_in addr;
 
-			char *string_address = malloc(strlen(buffer));
-			strcpy(string_address, buffer);
+    		socklen_t addr_size = sizeof(struct sockaddr_in);
+    		getpeername(*s, (struct sockaddr *)&addr, &addr_size);
+
+    		char * suscriptor_address = malloc(strlen(inet_ntoa(addr.sin_addr)));
+    		strcpy(suscriptor_address, inet_ntoa(addr.sin_addr));
 
 			/* Read port */
 
@@ -180,16 +197,16 @@ void *manage_request (int* s) {
 			char *string_port = malloc(strlen(buffer));
 			strcpy(string_port, buffer);
 
-			Node * node = getNode(atoi(string_port), string_address);
+			Node * node = getNode(atoi(string_port), suscriptor_address);
 
 			if(node == NULL) { // Node does not exist --> Create
 
-				node = createNewNode(atoi(string_port), string_address, topic);
+				node = createNewNode(atoi(string_port), suscriptor_address, topic);
 				setNode(node);
 
 			}
 
-			else {
+			else if (isSubscribed(node, topic) < 0){ // If it is not subscribed
 				addTopic(node, topic); // If node does exist --> Add topic
 			}
 
@@ -225,21 +242,32 @@ void *manage_request (int* s) {
 		if(check==FALSE) // If topic to unsubscribe does not exist
 		{
 
-			send(*s, "1", sizeof("1"), 0);
-			
-		}
-
-		else {
-
-			/* Read address */
+			/* Read port to free buffer */
 
 			if (readLine(*s, buffer, sizeof(buffer)) < 0)
 			{
 				perror("Broker error: error reading message");
 			}
 
-			char *string_address = malloc(strlen(buffer));
-			strcpy(string_address, buffer);
+			char *string_port = malloc(strlen(buffer));
+			strcpy(string_port, buffer);
+
+			send(*s, "1", sizeof("1"), 0);
+			
+		}
+
+		else {
+
+			/* Get address */
+
+			struct sockaddr_in addr;
+
+    		socklen_t addr_size = sizeof(struct sockaddr_in);
+    		getpeername(*s, (struct sockaddr *)&addr, &addr_size);
+
+    		char * suscriptor_address = malloc(strlen(inet_ntoa(addr.sin_addr)));
+    		strcpy(suscriptor_address, inet_ntoa(addr.sin_addr));
+
 
 			/* Read port */
 
@@ -251,16 +279,16 @@ void *manage_request (int* s) {
 			char *string_port = malloc(strlen(buffer));
 			strcpy(string_port, buffer);
 
-			Node * node = getNode(atoi(string_port), string_address);
+			Node * node = getNode(atoi(string_port), suscriptor_address);
 
-			if(node == NULL) { // Node does not exist --> Cannot unsubscribe
+			if(node == NULL || isSubscribed(node, topic) < 0) { // Node does not exist --> Cannot unsubscribe
 
 				send(*s, "1", sizeof("1"), 0);
 			}
 
-			else
+			else if (!isSubscribed(node, topic))
 			{
-				removeTopic(node, topic); // If node does exist --> Add topic
+				removeTopic(node, topic); // If node is subscribed --> Remove topic
 				send(*s, "0", sizeof("0"), 0);
 			}
 		}

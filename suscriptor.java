@@ -14,7 +14,6 @@ class suscriptor{
 	public static boolean exit = false;
 
 	private static int serverport = -1;
-	private static InetAddress serveraddress = null;
 
 	private static ServerSocket serverAddr = null;
 
@@ -31,8 +30,7 @@ class suscriptor{
 			System.err.println("c> NETWORK ERROR");
 		}
 
-		serverport = serverAddr.getLocalPort(); // Get port from server for posterior messages
-		serveraddress = serverAddr.getInetAddress(); // Get address from server for posterior messages
+		serverport = serverAddr.getLocalPort(); // Get port from server for posterior messages		
 
 		/* Initialize server socket for listening to broker */
 
@@ -69,10 +67,7 @@ class suscriptor{
 			os.writeBytes(topic + "\0");
 			os.flush();
 
-			/* Send to the broker both address and port where communications must be received */
-
-			os.writeBytes(serveraddress.toString() + "\0");
-			os.flush();
+			/* Send to the broker the port where communications must be received */
 
 			os.writeBytes(serverport + "\0");
 			os.flush();
@@ -130,10 +125,7 @@ class suscriptor{
 			os.writeBytes(topic + "\0");
 			os.flush();
 
-			/* Send to the broker both address and port where communications must be received */
-
-			os.writeBytes(serveraddress.toString() + "\0");
-			os.flush();
+			/* Send to the broker the port where communications must be received */
 
 			os.writeBytes(serverport + "\0");
 			os.flush();

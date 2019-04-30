@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "getopt.h": "c",
-        "socket.h": "c"
+        "socket.h": "c",
+        "constants.h": "c"
     }
 }
