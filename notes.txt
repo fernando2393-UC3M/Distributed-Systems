@@ -1,4 +1,0 @@
-To manage subscribers:
-
-    - Use list to store who is suscribed to which topic
-    - When a text is send by topic, send it to all suscriptors by search in list 
