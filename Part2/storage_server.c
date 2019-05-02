@@ -21,10 +21,10 @@ initializestorage_1_svc(void *result, struct svc_req *rqstp)
 	return retval;
 }
 
-char *
+bool_t
 recovertuple_1_svc(char *topic, char **result,  struct svc_req *rqstp)
 {
-
+	bool_t retval;
 	/*
 	 * insert server code here
 	 */
@@ -44,16 +44,15 @@ recovertuple_1_svc(char *topic, char **result,  struct svc_req *rqstp)
 
 	fclose(fp);
 
-	char * retval = malloc(strlen(text));
-	strcpy(retval, text);
+	strcpy(*result, text); // Copy the result text to result
 
 	return retval; // Return last message of topic
 }
 
-int
+bool_t
 addtuple_1_svc(char *topic, char *text, int *result,  struct svc_req *rqstp)
 {
-	int retval = 0;
+	bool_t retval;
 
 	/*
 	 * insert server code here
@@ -72,13 +71,15 @@ addtuple_1_svc(char *topic, char *text, int *result,  struct svc_req *rqstp)
 
 	if (fp == NULL) { // Error opening/creating file
 		perror("Error opening/creating file");
-		return retval = -1;
+		*result = -1;
 	}
 
 	fprintf(fp, "%s", text); // Write text into file
 	fprintf(fp, "\n"); // New line
 
 	fclose(fp);
+
+	*result = 0;
 
 	return retval;
 }

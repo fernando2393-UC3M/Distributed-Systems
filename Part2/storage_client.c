@@ -22,7 +22,7 @@ storage_1(char *host)
 	char *addtuple_1_text;
 
 #ifndef	DEBUG
-	clnt = clnt_create (host, STORAGE, STORAGEVER, "udp");
+	clnt = clnt_create (host, STORAGE, STORAGEVER, "tcp"); // Use tcp instead of udp
 	if (clnt == NULL) {
 		clnt_pcreateerror (host);
 		exit (1);
