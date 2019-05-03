@@ -7,6 +7,7 @@
 #include "storage.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define TOPIC_SIZE 128
 #define TEXT_SIZE 1024
