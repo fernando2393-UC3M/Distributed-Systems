@@ -106,30 +106,31 @@ void *manage_request(int *s, char *address)
 		/* Store text in proper file */
 
 		char *host = "localhost";
-			CLIENT *clnt;
-			enum clnt_stat retval_3;
-			int result_3; // Result of the operation
+		CLIENT *clnt;
+		enum clnt_stat retval_3;
+		int result_3; // Result of the operation
 
 #ifndef DEBUG
-			clnt = clnt_create(host, STORAGE, STORAGEVER, "tcp"); // Use tcp instead of udp
-			if (clnt == NULL)
-			{
-				clnt_pcreateerror(host);
-				exit(1);
-			}
+		clnt = clnt_create(host, STORAGE, STORAGEVER, "tcp"); // Use tcp instead of udp
+		if (clnt == NULL)
+		{
+			clnt_pcreateerror(host);
+			exit(1);
+		}
 #endif /* DEBUG */
 
-			retval_3 = addtuple_1(topic, text, &result_3, clnt);
-			if (retval_3 != RPC_SUCCESS)
-			{
-				clnt_perror(clnt, "call failed");
-			}
+		retval_3 = addtuple_1(topic, text, &result_3, clnt);
+		if (retval_3 != RPC_SUCCESS)
+		{
+			clnt_perror(clnt, "call failed");
+		}
 
 #ifndef DEBUG
-			clnt_destroy(clnt);
+		clnt_destroy(clnt);
 #endif /* DEBUG */
 
-		if (result_3 < 0) {
+		if (result_3 < 0)
+		{
 			perror("Error storing text in topic file");
 		}
 

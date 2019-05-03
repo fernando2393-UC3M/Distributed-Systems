@@ -3,6 +3,8 @@
 
 # Parameters
 
+BIN_FILES  = editor broker storage_server
+
 SERVER = storage_server
 BROKER = broker
 EDITOR = editor
@@ -42,11 +44,10 @@ $(OBJECTS_CLNT) : $(SOURCES_CLNT.c) $(SOURCES_CLNT.h) $(TARGETS_CLNT.c)
 $(OBJECTS_SVC) : $(SOURCES_SVC.c) $(SOURCES_SVC.h) $(TARGETS_SVC.c) 
 
 $(BROKER) : $(OBJECTS_CLNT) 
-	$(LINK.c) -o $(BROKER) $(OBJECTS_CLNT) $(LDLIBS) $(CFLAGS)
+	$(LINK.c) -o $(BROKER) $(OBJECTS_CLNT) lines.c $(LDLIBS) $(LDFLAGS) $(CFLAGS)
 
 $(SERVER) : $(OBJECTS_SVC) 
 	$(LINK.c) -o $(SERVER) $(OBJECTS_SVC) $(LDLIBS)
 
  clean:
-	 $(RM) core $(TARGETS) $(OBJECTS_CLNT) $(OBJECTS_SVC) $(BROKER) $(SERVER) $(EDITOR) *.o
-
+	 rm -f $(BIN_FILES) *.o

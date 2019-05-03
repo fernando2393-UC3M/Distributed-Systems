@@ -20,7 +20,7 @@ initializestorage_1_svc(void *result, struct svc_req *rqstp)
 	 * insert server code here
 	 */
 
-	return retval;
+	return retval = RPC_SUCCESS;
 }
 
 bool_t
@@ -48,7 +48,7 @@ recovertuple_1_svc(char *topic, char **result,  struct svc_req *rqstp)
 
 	strcpy(*result, text); // Copy the result text to result
 
-	return retval; // Return last message of topic
+	return retval = RPC_SUCCESS; // Return last message of topic
 }
 
 bool_t
@@ -83,7 +83,7 @@ addtuple_1_svc(char *topic, char *text, int *result,  struct svc_req *rqstp)
 
 	*result = 0;
 
-	return retval;
+	return retval = RPC_SUCCESS;
 }
 
 int
