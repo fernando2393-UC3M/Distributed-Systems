@@ -3,8 +3,9 @@
 
 # Parameters
 
-CLIENT = broker
 SERVER = storage_server
+BROKER = broker
+EDITOR = editor
 
 SOURCES_CLNT.c = 
 SOURCES_CLNT.h = 
@@ -13,21 +14,25 @@ SOURCES_SVC.h =
 SOURCES.x = storage.x
 
 TARGETS_SVC.c = storage_svc.c storage_server.c storage_xdr.c 
-TARGETS_CLNT.c = storage_clnt.c storage_client.c storage_xdr.c 
-TARGETS = storage.h storage_xdr.c storage_clnt.c storage_svc.c storage_client.c storage_server.c broker.c
+TARGETS_CLNT.c = storage_clnt.c broker.c storage_xdr.c 
+TARGETS = storage.h storage_xdr.c storage_clnt.c storage_svc.c storage_server.c broker.c
 
 OBJECTS_CLNT = $(SOURCES_CLNT.c:%.c=%.o) $(TARGETS_CLNT.c:%.c=%.o)
 OBJECTS_SVC = $(SOURCES_SVC.c:%.c=%.o) $(TARGETS_SVC.c:%.c=%.o)
 # Compiler flags 
 
 CPPFLAGS += -D_REENTRANT
-CFLAGS += -g 
-LDLIBS += -lnsl -lpthread 
- RPCGENFLAGS = 
+CFLAGS += -Wall -g 
+LDLIBS += -lnsl -lpthread
+LDFLAGS = -L$(INSTALL_PATH)/lib/
+ RPCGENFLAGS = -N -M
 
 # Targets 
 
-all : $(CLIENT) $(SERVER)
+all : $(SERVER) $(BROKER) $(EDITOR)
+
+editor: editor.o lines.o
+	$(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
 $(TARGETS) : $(SOURCES.x) 
 	rpcgen $(RPCGENFLAGS) $(SOURCES.x)
@@ -36,12 +41,12 @@ $(OBJECTS_CLNT) : $(SOURCES_CLNT.c) $(SOURCES_CLNT.h) $(TARGETS_CLNT.c)
 
 $(OBJECTS_SVC) : $(SOURCES_SVC.c) $(SOURCES_SVC.h) $(TARGETS_SVC.c) 
 
-$(CLIENT) : $(OBJECTS_CLNT) 
-	$(LINK.c) -o $(CLIENT) $(OBJECTS_CLNT) $(LDLIBS) 
+$(BROKER) : $(OBJECTS_CLNT) 
+	$(LINK.c) -o $(BROKER) $(OBJECTS_CLNT) $(LDLIBS) $(CFLAGS)
 
 $(SERVER) : $(OBJECTS_SVC) 
 	$(LINK.c) -o $(SERVER) $(OBJECTS_SVC) $(LDLIBS)
 
  clean:
-	 $(RM) core $(TARGETS) $(OBJECTS_CLNT) $(OBJECTS_SVC) $(CLIENT) $(SERVER)
+	 $(RM) core $(TARGETS) $(OBJECTS_CLNT) $(OBJECTS_SVC) $(BROKER) $(SERVER) $(EDITOR) *.o
 
