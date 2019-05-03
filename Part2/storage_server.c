@@ -7,7 +7,9 @@
 #include "storage.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "constants.h"
+
+#define TOPIC_SIZE 128
+#define TEXT_SIZE 1024
 
 bool_t
 initializestorage_1_svc(void *result, struct svc_req *rqstp)
