@@ -2,6 +2,8 @@
     "files.associations": {
         "getopt.h": "c",
         "socket.h": "c",
-        "constants.h": "c"
+        "constants.h": "c",
+        "stdio.h": "c",
+        "stdlib.h": "c"
     }
 }
