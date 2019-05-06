@@ -72,7 +72,7 @@ addtuple_1_svc(char *topic, char *text, int *result,  struct svc_req *rqstp)
 
 	snprintf(filepath, 10 + strlen(topic), "data/%s.txt\n", topic);
 
-	fp = fopen(filepath, "w"); // Open file for writing
+	fp = fopen(filepath, "a"); // Open file for writing without erasing previous content
 
 	if (fp == NULL) { // Error opening/creating file
 		perror("Error opening/creating file");
