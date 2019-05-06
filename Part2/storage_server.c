@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <dirent.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <errno.h>
 
 #define TOPIC_SIZE 128
@@ -31,8 +33,8 @@ initializestorage_1_svc(void *result, struct svc_req *rqstp)
 	}
 	else if (ENOENT == errno)
 	{
-		/* Directory does not exist. Create*/
-		mkdir("data");
+		/* Directory does not exist. Create */
+		mkdir("data", 0700);
 	}
 	else
 	{

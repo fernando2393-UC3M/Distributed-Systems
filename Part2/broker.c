@@ -467,7 +467,6 @@ int main(int argc, char *argv[])
 		char *host = "localhost";
 		CLIENT *clnt;
 		enum clnt_stat retval_1;
-		int result_1; // Result of the operation
 
 #ifndef DEBUG
 		clnt = clnt_create(host, STORAGE, STORAGEVER, "tcp"); // Use tcp instead of udp
@@ -478,7 +477,7 @@ int main(int argc, char *argv[])
 		}
 #endif /* DEBUG */
 
-		retval_1 = initializestorage_1(result_1, clnt);
+		retval_1 = initializestorage_1(NULL, clnt);
 		if (retval_1 != RPC_SUCCESS)
 		{
 			clnt_perror(clnt, "call failed");
