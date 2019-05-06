@@ -8,6 +8,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <dirent.h>
+#include <errno.h>
 
 #define TOPIC_SIZE 128
 #define TEXT_SIZE 1024
@@ -20,6 +22,23 @@ initializestorage_1_svc(void *result, struct svc_req *rqstp)
 	/*
 	 * insert server code here
 	 */
+
+	DIR *dir = opendir("data");
+	if (dir)
+	{
+		/* Directory exists. */
+		closedir(dir);
+	}
+	else if (ENOENT == errno)
+	{
+		/* Directory does not exist. Create*/
+		mkdir("data");
+	}
+	else
+	{
+		/* opendir() failed for some other reason. */
+		perror("Error opening/creating dir");
+	}
 
 	return retval = RPC_SUCCESS;
 }

@@ -461,6 +461,33 @@ void *manage_request(int *s, char *address)
 
 int main(int argc, char *argv[])
 {
+
+		/* First check if directory exists --> if not, create */
+
+		char *host = "localhost";
+		CLIENT *clnt;
+		enum clnt_stat retval_1;
+		int result_1; // Result of the operation
+
+#ifndef DEBUG
+		clnt = clnt_create(host, STORAGE, STORAGEVER, "tcp"); // Use tcp instead of udp
+		if (clnt == NULL)
+		{
+			clnt_pcreateerror(host);
+			exit(1);
+		}
+#endif /* DEBUG */
+
+		retval_1 = initializestorage_1(result_1, clnt);
+		if (retval_1 != RPC_SUCCESS)
+		{
+			clnt_perror(clnt, "call failed");
+		}
+
+#ifndef DEBUG
+		clnt_destroy(clnt);
+#endif /* DEBUG */
+
 	int option = 0;
 	char port[256] = "";
 
