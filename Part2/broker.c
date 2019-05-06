@@ -291,7 +291,7 @@ void *manage_request(int *s, char *address)
 			char *host = "localhost";
 			CLIENT *clnt;
 			enum clnt_stat retval_2;
-			char *result_2; // This will be the text to send to subscribed client
+			char * result_2 = malloc(TEXT_SIZE); // This will be the text to send to subscribed client
 
 #ifndef DEBUG
 			clnt = clnt_create(host, STORAGE, STORAGEVER, "tcp"); // Use tcp instead of udp
@@ -358,7 +358,7 @@ void *manage_request(int *s, char *address)
 				close(sd);
 			}
 
-			if (send(sd, text, strlen(text), 0) == -1)
+			if (send(sd, result_2, strlen(result_2), 0) == -1)
 			{
 				perror("Error sending text");
 

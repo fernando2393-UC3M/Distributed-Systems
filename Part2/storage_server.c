@@ -47,6 +47,8 @@ recovertuple_1_svc(char *topic, char **result,  struct svc_req *rqstp)
 
 	fclose(fp);
 
+	*result = malloc(TEXT_SIZE);
+
 	strcpy(*result, text); // Copy the result text to result
 
 	return retval = RPC_SUCCESS; // Return last message of topic
