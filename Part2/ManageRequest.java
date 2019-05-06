@@ -20,6 +20,7 @@ public class ManageRequest extends Thread implements Runnable {
             String text = br.readLine();
 
             System.out.println("MESSAGE FROM " + topic + " : " + text);
+            System.out.print("c> ");
 
             sc.close(); // Message read --> Close socket connection
         } 
