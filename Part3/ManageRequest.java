@@ -19,7 +19,9 @@ public class ManageRequest extends Thread implements Runnable {
 
             String text = br.readLine();
 
-            System.out.println("MESSAGE FROM " + topic + " : " + text);
+            formatter form = new formatter();
+
+            System.out.println("MESSAGE FROM " + topic + " : " + form.converter(text));
             System.out.print("c> ");
 
             sc.close(); // Message read --> Close socket connection
