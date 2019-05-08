@@ -45,6 +45,7 @@ Node * createNewNode(int port, char * ip_address, char *topic){
 
     newNode->topics[0] = malloc(TOPIC_SIZE);
     strcpy(newNode->topics[0], topic);
+    newNode->topics[1] = NULL;
 
     newNode->next = NULL;
 
@@ -105,6 +106,7 @@ void addTopic(Node *node, char *topic)
     }
     node->topics[counter] = malloc(TOPIC_SIZE);
     strcpy(node->topics[counter], topic);
+    node->topics[counter + 1] = NULL; // Set next position to NULL in case of remove
 }
 
 void removeTopic(Node *node, char *topic)
@@ -124,6 +126,7 @@ void removeTopic(Node *node, char *topic)
 	if (node->topics[counter] == NULL)
 	{
 		node->topics[counter - 1] = NULL;
+        free(node->topics[counter]);
 	}
 
 	else
@@ -136,6 +139,7 @@ void removeTopic(Node *node, char *topic)
 		}
 
 		node->topics[counter] = NULL;
+        free(node->topics[counter + 1]);
 	}
 }
 

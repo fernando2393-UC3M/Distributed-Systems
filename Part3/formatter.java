@@ -14,7 +14,9 @@ public class formatter {
 
         public String converter(String text) {
 
-        String [] words = text.split("\\s+");
+        String testText = text.substring(1); // To remove first separator character "\n" from C
+
+        String [] words = testText.split("\\s+");
 
         NumberConversion myservice = new NumberConversion();
         NumberConversionSoapType port = myservice.getNumberConversionSoap();
@@ -27,8 +29,11 @@ public class formatter {
                 words[i] = port.numberToWords(ubiNum);
                 finalText += words[i];
             }
-            else {
+            else if (i < (words.length - 1)){
                 finalText += words[i] + " ";
+            }
+            else {
+                finalText += words[i];
             }
         }
 

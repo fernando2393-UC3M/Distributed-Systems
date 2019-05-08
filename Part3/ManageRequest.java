@@ -27,7 +27,8 @@ public class ManageRequest extends Thread implements Runnable {
             sc.close(); // Message read --> Close socket connection
         } 
         catch (Exception e) {
-            System.err.print("NETWORK ERROR");
+            System.err.println("NETWORK ERROR");
+            System.out.print("c> ");
         }
     }
 }

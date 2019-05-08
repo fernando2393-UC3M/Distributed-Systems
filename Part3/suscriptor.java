@@ -217,6 +217,7 @@ class suscriptor{
 				}
 			} catch (java.io.IOException e) {
 				System.err.println("c> NETWORK ERROR");
+				System.out.print("c> ");
 				e.printStackTrace();
 			}
 		}		

@@ -80,6 +80,8 @@ void *manage_request(int *s, char *address)
 		text = malloc(strlen(buffer));
 		strcpy(text, buffer);
 
+		close(*s); // Close socket
+
 		/* Check if topic is in the topic list, if not, add */
 
 		int check = FALSE;
@@ -243,6 +245,8 @@ void *manage_request(int *s, char *address)
 			strcpy(string_port, buffer);
 
 			send(*s, "1", sizeof("1"), 0);
+
+			close(*s);
 		}
 
 		else

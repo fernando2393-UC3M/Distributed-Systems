@@ -19,7 +19,7 @@
 bool_t
 initializestorage_1_svc(void *result, struct svc_req *rqstp)
 {
-	bool_t retval;
+	bool_t retval = TRUE;
 
 	/*
 	 * insert server code here
@@ -42,13 +42,13 @@ initializestorage_1_svc(void *result, struct svc_req *rqstp)
 		perror("Error opening/creating dir");
 	}
 
-	return retval = RPC_SUCCESS;
+	return retval;
 }
 
 bool_t
 recovertuple_1_svc(char *topic, char **result,  struct svc_req *rqstp)
 {
-	bool_t retval;
+	bool_t retval = TRUE;
 	/*
 	 * insert server code here
 	 */
@@ -72,13 +72,13 @@ recovertuple_1_svc(char *topic, char **result,  struct svc_req *rqstp)
 
 	strcpy(*result, text); // Copy the result text to result
 
-	return retval = RPC_SUCCESS; // Return last message of topic
+	return retval; // Return last message of topic
 }
 
 bool_t
 addtuple_1_svc(char *topic, char *text, int *result,  struct svc_req *rqstp)
 {
-	bool_t retval;
+	bool_t retval = TRUE;
 
 	/*
 	 * insert server code here
@@ -107,7 +107,7 @@ addtuple_1_svc(char *topic, char *text, int *result,  struct svc_req *rqstp)
 
 	*result = 0;
 
-	return retval = RPC_SUCCESS;
+	return retval;
 }
 
 int
