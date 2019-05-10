@@ -33,7 +33,7 @@ void print_usage()
 void *manage_request(int *s, char *address)
 {
 
-	char buffer[TEXT_SIZE];
+	char buffer[TOPIC_SIZE];
 	char *operation = NULL;
 	char *topic = NULL;
 	char *text = NULL;
@@ -99,7 +99,7 @@ void *manage_request(int *s, char *address)
 
 		if (check == FALSE)
 		{ // If it is not in the list, include
-			topiclist[counter] = malloc(sizeof(topic));
+			topiclist[counter] = malloc(strlen(topic));
 			strcpy(topiclist[counter], topic);
 		}
 
@@ -112,14 +112,14 @@ void *manage_request(int *s, char *address)
 		enum clnt_stat retval_3;
 		int result_3; // Result of the operation
 
-#ifndef DEBUG
+
 		clnt = clnt_create(host, STORAGE, STORAGEVER, "tcp"); // Use tcp instead of udp
 		if (clnt == NULL)
 		{
 			clnt_pcreateerror(host);
 			exit(1);
 		}
-#endif /* DEBUG */
+
 
 		retval_3 = addtuple_1(topic, text, &result_3, clnt);
 		if (retval_3 != RPC_SUCCESS)
@@ -127,9 +127,9 @@ void *manage_request(int *s, char *address)
 			clnt_perror(clnt, "call failed");
 		}
 
-#ifndef DEBUG
+
 		clnt_destroy(clnt);
-#endif /* DEBUG */
+
 
 		if (result_3 < 0)
 		{
@@ -297,14 +297,12 @@ void *manage_request(int *s, char *address)
 			enum clnt_stat retval_2;
 			char * result_2 = malloc(TEXT_SIZE); // This will be the text to send to subscribed client
 
-#ifndef DEBUG
 			clnt = clnt_create(host, STORAGE, STORAGEVER, "tcp"); // Use tcp instead of udp
 			if (clnt == NULL)
 			{
 				clnt_pcreateerror(host);
 				exit(1);
 			}
-#endif /* DEBUG */
 
 			retval_2 = recovertuple_1(topic, &result_2, clnt);
 			if (retval_2 != RPC_SUCCESS)
@@ -312,9 +310,7 @@ void *manage_request(int *s, char *address)
 				clnt_perror(clnt, "call failed");
 			}
 
-#ifndef DEBUG
 			clnt_destroy(clnt);
-#endif /* DEBUG */
 
 			/* Send text of topic to client */
 
@@ -362,7 +358,7 @@ void *manage_request(int *s, char *address)
 				close(sd);
 			}
 
-			if (send(sd, result_2, strlen(result_2), 0) == -1)
+			else if (send(sd, result_2, strlen(result_2), 0) == -1)
 			{
 				perror("Error sending text");
 
@@ -371,7 +367,10 @@ void *manage_request(int *s, char *address)
 				close(sd);
 			}
 
-			close(sd);
+			else
+			{
+				close(sd);
+			}
 		}
 	}
 
@@ -458,6 +457,10 @@ void *manage_request(int *s, char *address)
 		close(*s);
 	}
 
+	free(operation);
+	free(topic);
+	free(text);
+
 	/* End of request management */
 
 	pthread_exit(NULL);
@@ -472,14 +475,12 @@ int main(int argc, char *argv[])
 		CLIENT *clnt;
 		enum clnt_stat retval_1;
 
-#ifndef DEBUG
 		clnt = clnt_create(host, STORAGE, STORAGEVER, "tcp"); // Use tcp instead of udp
 		if (clnt == NULL)
 		{
 			clnt_pcreateerror(host);
 			exit(1);
 		}
-#endif /* DEBUG */
 
 		retval_1 = initializestorage_1(NULL, clnt);
 		if (retval_1 != RPC_SUCCESS)
@@ -487,9 +488,7 @@ int main(int argc, char *argv[])
 			clnt_perror(clnt, "call failed");
 		}
 
-#ifndef DEBUG
 		clnt_destroy(clnt);
-#endif /* DEBUG */
 
 	int option = 0;
 	char port[256] = "";
