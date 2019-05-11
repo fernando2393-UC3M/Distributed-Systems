@@ -13,8 +13,8 @@
 #include <sys/stat.h>
 #include <errno.h>
 
-#define TOPIC_SIZE 128
-#define TEXT_SIZE 1024
+#define TOPIC_SIZE 129
+#define TEXT_SIZE 1025
 
 bool_t
 initializestorage_1_svc(void *result, struct svc_req *rqstp)

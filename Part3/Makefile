@@ -8,6 +8,10 @@ BIN_FILES  = editor broker storage_server
 SERVER = storage_server
 BROKER = broker
 EDITOR = editor
+SUSCRIPTOR = suscriptor
+
+CC = gcc
+JJ = javac
 
 SOURCES_CLNT.c = 
 SOURCES_CLNT.h = 
@@ -31,7 +35,10 @@ LDFLAGS = -L$(INSTALL_PATH)/lib/
 
 # Targets 
 
-all : $(SERVER) $(BROKER) $(EDITOR)
+all : $(SERVER) $(BROKER) $(EDITOR) $(SUSCRIPTOR)
+
+suscriptor: suscriptor.java
+	$(JJ) $^
 
 editor: editor.o lines.o
 	$(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@
@@ -50,4 +57,4 @@ $(SERVER) : $(OBJECTS_SVC)
 	$(LINK.c) -o $(SERVER) $(OBJECTS_SVC) $(LDLIBS)
 
  clean:
-	 rm -f $(BIN_FILES) *.o
+	 rm -f $(BIN_FILES) *.o *.class
