@@ -32,8 +32,8 @@ int main(int argc, char *argv[]) {
 	}
 
 	/* Variables declaration */
-  struct hostent *hp;
-	struct sockaddr_in server_address;  /* broker address */
+	struct hostent *hp;
+	struct sockaddr_in server_address; /* broker address */
 
 	while ((option = getopt(argc, argv, "h:p:t:m:")) != -1)
 	{
@@ -46,9 +46,19 @@ int main(int argc, char *argv[]) {
 			strcpy(port, optarg);
 			break;
 		case 't':
+			if (strlen(optarg) > TOPIC_SIZE)
+			{	
+				printf("Topic too big! Maximum size is 128 characters!\n");
+				exit(-1);
+			}
 			strcpy(topic, optarg);
 			break;
 		case 'm':
+			if (strlen(optarg) > TEXT_SIZE)
+			{
+				printf("Text too big! Maximum size is 1024 characters!\n");
+				exit(-1);
+			}
 			strcpy(text, optarg);
 			break;
 		default:

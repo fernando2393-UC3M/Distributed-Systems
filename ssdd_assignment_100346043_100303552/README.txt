@@ -20,6 +20,6 @@ In order to deploy and execute the application:
         - UNSUBSCRIBE <topic>
         - QUIT (to finalize the execution)
 
-    - In case of wanted to go back to the pre-deployment stage write "make clean" in the command line.
+    - In case of wanted to go back to the pre-deployment stage write "make clean" in the command line
 
-    - To regenerate the files from the .x file, execute "rpcgen -a -N -M storage.x", but not recommended since the server class will be enterely erased, so it has to be written again
+    - To regenerate the files from the .x file, execute "rpcgen -a -N -M storage.x", but not recommended since the server class will be entirely erased, so it has to be written again

@@ -413,7 +413,7 @@ void *manage_request(int *s, char *address)
 			char *string_port = malloc(strlen(buffer));
 			strcpy(string_port, buffer);
 
-			send(*s, "1", sizeof("1"), 0);
+			send(*s, "2", sizeof("2"), 0);
 		}
 
 		else
