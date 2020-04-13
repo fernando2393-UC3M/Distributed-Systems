@@ -1,0 +1,11 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - test",
+            "request": "launch",
+            "mainClass": "Part3.test",
+            "projectName": "DistributedSystemsFinal_3889b57b"
+        }
+    ]
+}
