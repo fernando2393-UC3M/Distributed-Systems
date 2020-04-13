@@ -1,5 +1,5 @@
-# DistributedSystemsFinal
-University Carlos III of Madrid -> Final practice of distributed systems.
+# Distributed Systems Final
+This repository contains the final practice of the UC3M Distributed Systems course.
 
 In order to deploy and execute the application:
 
