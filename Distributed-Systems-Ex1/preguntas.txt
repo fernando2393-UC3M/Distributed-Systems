@@ -1,0 +1,17 @@
+- Lista como estructura de datos?
+- Init simplemente borra el contenido de la lista?
+- La lista está en cliente o servidor? Quién la implementa?
+- Estructura del mensaje que se envía --> struct del tipo request?
+
+Respuestas:
+
+- Lista como estructura de datos que debe crearse y ser accedida únicamente por el servidor.
+- Init crea la lista y borra su contenido en el caso de que existiera una lista previamente.
+- Como se ha dicho, la lista está en el servidor únicamente, y el cliente manda comandos al servidor, que los procesa
+  y devuelve el resultado al cliente.
+- La estructura ha de tener la key, los values y el código de operación a realizar por parte del servidor.
+- Asignar un código de operación a cada una de las funciones a realizar en la estructura del mensaje.
+
+----------------------------------------------------------------------------------------------------------------------------------------------------
+
+- Posiblemente el get value falle al pasar los valores del nodo, que hemos visto que los encuentra, a las direcciones de memoria de los valores en cliente, debido a su ¿inicialización?
