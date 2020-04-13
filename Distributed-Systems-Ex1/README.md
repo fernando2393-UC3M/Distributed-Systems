@@ -1,3 +1,3 @@
-# ex1Distribuidos
+# Distributed Systems
 
-Distributed Systems Practice 1 of University Carlos III of Madrid
+First exercise of UC3M Distributed Systems course.
