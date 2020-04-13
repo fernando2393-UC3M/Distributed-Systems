@@ -1,2 +1,3 @@
-# ex2Distribuidos
-Second exercise of Distributed Systems course in UC3M
+# Distributed Systems
+
+Second exercise of UC3M Distributed Systems course.
